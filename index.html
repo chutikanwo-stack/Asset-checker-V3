@@ -1,1125 +1,402 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asset Checker · 3D Studio</title>
+<title>Asset Checker v2 · 3D Studio</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-:root {
-  --bg: #0a0d14;
-  --surf: #101520;
-  --card: #151c2c;
-  --card2: #1b2438;
-  --b1: #222f46;
-  --b2: #2d3f5e;
-  
-  /* Vibrant Accents */
-  --teal: #00f0ca;
-  --teal-glow: rgba(0, 240, 202, 0.15);
-  --blue: #4da6ff;
-  --amber: #ffb84d;
-  --red: #ff5277;
-  --purple: #b39ddb;
-  
-  /* Text Theme */
-  --txt: #e2eeff;
-  --muted: #627d98;
-  --muted2: #334e68;
-  
-  --r: 12px;
-  --sidebar-w: 280px;
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-body {
-  font-family: 'Sarabun', sans-serif;
-  background: var(--bg);
-  color: var(--txt);
-  min-height: 100vh;
-  overflow-x: hidden;
-  letter-spacing: 0.01em;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at 50% -20%, rgba(0, 240, 202, 0.08), transparent 60%),
-              radial-gradient(circle at 0% 100%, rgba(77, 166, 255, 0.03), transparent 40%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ─── LAYOUT ─── */
-.shell {
-  display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr;
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-}
-
-/* ─── SIDEBAR ─── */
-.sidebar {
-  background: var(--surf);
-  border-right: 1px solid var(--b1);
-  display: flex;
-  flex-direction: column;
-  padding: 2rem 0;
-  transition: var(--transition);
-}
-
-.brand {
-  padding: 0 1.75rem 2rem;
-  border-bottom: 1px solid var(--b1);
-}
-
-.brand-mark {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(135deg, rgba(0, 240, 202, 0.2), rgba(77, 166, 255, 0.2));
-  border: 1px solid rgba(0, 240, 202, 0.4);
-  border-radius: var(--r);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--teal);
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 240, 202, 0.1);
-}
-
-.brand h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--txt);
-}
-
-.brand p {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-nav {
-  padding: 1.5rem 0;
-  flex: 1;
-}
-
-.nav-section {
-  font-size: 11px;
-  font-family: 'Syne', sans-serif;
-  letter-spacing: 0.15em;
-  color: var(--muted);
-  padding: 0.75rem 1.75rem;
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 1.75rem;
-  cursor: pointer;
-  transition: var(--transition);
-  border-left: 3px solid transparent;
-  font-size: 14px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.nav-item:hover {
-  background: rgba(0, 240, 202, 0.03);
-  color: var(--txt);
-  padding-left: 1.9rem;
-}
-
-.nav-item.active {
-  background: linear-gradient(90deg, rgba(0, 240, 202, 0.08), transparent);
-  border-left-color: var(--teal);
-  color: var(--teal);
-  font-weight: 600;
-}
-
-.nav-icon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
-}
-
-.nav-badge {
-  margin-left: auto;
-  font-size: 10px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  background: rgba(255, 82, 119, 0.15);
-  color: var(--red);
-  border: 1px solid rgba(255, 82, 119, 0.3);
-  padding: 2px 8px;
-  border-radius: 20px;
-}
-
-.nav-badge.ok {
-  background: rgba(0, 240, 202, 0.15);
-  color: var(--teal);
-  border-color: rgba(0, 240, 202, 0.3);
-}
-
-/* ─── MOBILE MENU BTN ─── */
-.menu-btn {
-  display: none;
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 200;
-  width: 40px;
-  height: 40px;
-  background: var(--surf);
-  border: 1px solid var(--b1);
-  border-radius: var(--r);
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  color: var(--txt);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  transition: var(--transition);
-}
-.menu-btn:hover {
-  border-color: var(--teal);
-}
-
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(7, 9, 12, 0.6);
-  z-index: 150;
-  backdrop-filter: blur(8px);
-}
-
-/* ─── MAIN ─── */
-.main {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-width: 0;
-}
-
-.topbar {
-  padding: 1.25rem 2.5rem;
-  border-bottom: 1px solid var(--b1);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(16, 21, 32, 0.8);
-  backdrop-filter: blur(12px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.topbar h2 {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  flex: 1;
-}
-
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.status-pill {
-  font-size: 11px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  padding: 6px 16px;
-  border-radius: 20px;
-  letter-spacing: 0.05em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.pill-idle { background: var(--card2); border: 1px solid var(--b2); color: var(--muted); }
-.pill-ready { background: rgba(0, 240, 202, 0.12); border: 1px solid rgba(0, 240, 202, 0.3); color: var(--teal); }
-.pill-warn { background: rgba(255, 184, 77, 0.12); border: 1px solid rgba(255, 184, 77, 0.3); color: var(--amber); }
-.pill-fail { background: rgba(255, 82, 119, 0.12); border: 1px solid rgba(255, 82, 119, 0.3); color: var(--red); }
-
-.content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 2.5rem;
-}
-
-/* ─── PAGE VIEWS ─── */
-.page { display: none; animation: fadeIn 0.3s ease-out; }
-.page.active { display: block; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ─── DROP ZONE ─── */
-.dropzone {
-  border: 2px dashed var(--b2);
-  border-radius: 16px;
-  padding: 4.5rem 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: var(--transition);
-  position: relative;
-  background: linear-gradient(180deg, var(--surf), var(--bg));
-  margin-bottom: 2rem;
-  box-shadow: inset 0 4px 20px rgba(0,0,0,0.2);
-}
-
-.dropzone:hover, .dropzone.over {
-  border-color: var(--teal);
-  background: rgba(0, 240, 202, 0.02);
-  box-shadow: 0 0 24px var(--teal-glow), inset 0 4px 20px rgba(0,0,0,0.2);
-  transform: translateY(-2px);
-}
-
-.dropzone input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-}
-
-.dz-icon {
-  font-size: 52px;
-  display: block;
-  margin-bottom: 1.25rem;
-  filter: drop-shadow(0 4px 12px rgba(0,240,202,0.2));
-  transition: var(--transition);
-}
-.dropzone:hover .dz-icon {
-  transform: scale(1.1);
-}
-
-.dropzone h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.dropzone p {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 1.25rem;
-}
-
-.dz-hint {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.dz-tag {
-  font-size: 11px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  background: rgba(34, 47, 70, 0.4);
-  border: 1px solid var(--b1);
-  color: var(--muted);
-  padding: 4px 12px;
-  border-radius: 6px;
-  transition: var(--transition);
-}
-.dropzone:hover .dz-tag {
-  color: var(--txt);
-  border-color: var(--b2);
-}
-
-/* SECTION LABELS */
-.section-lbl {
-  font-family: 'Syne', sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  display: block;
-}
-
-/* ─── CHECKLIST TOGGLES ─── */
-.cl-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin-bottom: 2rem;
-}
-
-.cl-item {
-  background: var(--card);
-  border: 1px solid var(--b1);
-  border-radius: var(--r);
-  padding: 14px 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: var(--transition);
-  user-select: none;
-}
-
-.cl-item:hover {
-  border-color: var(--b2);
-  background: var(--card2);
-  transform: translateY(-1px);
-}
-
-.cl-item.on {
-  border-color: rgba(0, 240, 202, 0.4);
-  background: rgba(0, 240, 202, 0.04);
-  box-shadow: 0 4px 12px rgba(0, 240, 202, 0.03);
-}
-
-.cl-box {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--b2);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: var(--transition);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.cl-item.on .cl-box {
-  background: var(--teal);
-  border-color: var(--teal);
-  color: var(--bg);
-  box-shadow: 0 0 8px rgba(0, 240, 202, 0.4);
-}
-
-.cl-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.cl-name {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.cl-ext {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: 'Syne', sans-serif;
-  margin-top: 2px;
-}
-
-.btn-scan {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(90deg, var(--teal), var(--blue));
-  border: none;
-  border-radius: var(--r);
-  color: #05070a;
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  cursor: pointer;
-  transition: var(--transition);
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 240, 202, 0.2);
-}
-
-.btn-scan:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 240, 202, 0.35);
-  filter: brightness(1.1);
-}
-
-.btn-scan:disabled {
-  background: var(--b1);
-  color: var(--muted);
-  box-shadow: none;
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* ─── SUMMARY CARDS ─── */
-.sumgrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 2rem;
-}
-
-.scard {
-  background: var(--card);
-  border: 1px solid var(--b1);
-  border-radius: var(--r);
-  padding: 1.5rem 1rem;
-  text-align: center;
-  transition: var(--transition);
-}
-.scard:hover {
-  border-color: var(--b2);
-  transform: translateY(-2px);
-}
-
-.snum {
-  font-family: 'Syne', sans-serif;
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 6px;
-}
-.snum.tc { color: var(--teal); filter: drop-shadow(0 2px 8px rgba(0,240,202,0.2)); }
-.snum.ta { color: var(--amber); filter: drop-shadow(0 2px 8px rgba(255,184,77,0.2)); }
-.snum.tr { color: var(--red); filter: drop-shadow(0 2px 8px rgba(255,82,119,0.2)); }
-.snum.tb { color: var(--blue); filter: drop-shadow(0 2px 8px rgba(77,166,255,0.2)); }
-
-.slbl {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-/* ─── RESULTS TOOLBAR ─── */
-.results-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.filter-btn {
-  font-size: 12px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  padding: 7px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--b1);
-  background: var(--card);
-  color: var(--muted);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.filter-btn:hover {
-  border-color: var(--b2);
-  color: var(--txt);
-}
-
-.filter-btn.active { background: rgba(0, 240, 202, 0.1); border-color: rgba(0, 240, 202, 0.4); color: var(--teal); }
-.filter-btn.active-warn { background: rgba(255, 184, 77, 0.1); border-color: rgba(255, 184, 77, 0.4); color: var(--amber); }
-.filter-btn.active-err { background: rgba(255, 82, 119, 0.1); border-color: rgba(255, 82, 119, 0.4); color: var(--red); }
-
-.export-btn {
-  margin-left: auto;
-  font-size: 12px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  padding: 7px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--b1);
-  background: var(--card2);
-  color: var(--txt);
-  cursor: pointer;
-  transition: var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.export-btn:hover {
-  border-color: var(--teal);
-  color: var(--teal);
-  box-shadow: 0 4px 12px var(--teal-glow);
-}
-
-/* ─── FILE TABLE ─── */
-.ftable {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-}
-
-.ftable th {
-  text-align: left;
-  font-family: 'Syne', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--b1);
-  background: var(--surf);
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.ftable td {
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(34, 47, 70, 0.4);
-  vertical-align: middle;
-}
-
-.ftable tr:last-child td {
-  border-bottom: none;
-}
-
-.ftable tr:hover td {
-  background: rgba(0, 240, 202, 0.02);
-}
-
-.fname {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--txt);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 280px;
-}
-
-.fsize {
-  font-family: 'Syne', sans-serif;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.fext-badge {
-  font-family: 'Syne', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  display: inline-block;
-}
-
-.ext-blend { background: rgba(255, 184, 77, 0.12); color: var(--amber); border: 1px solid rgba(255, 184, 77, 0.25); }
-.ext-fbx, .ext-obj { background: rgba(179, 157, 219, 0.12); color: var(--purple); border: 1px solid rgba(179, 157, 219, 0.25); }
-.ext-ai, .ext-psd, .ext-eps { background: rgba(77, 166, 255, 0.12); color: var(--blue); border: 1px solid rgba(77, 166, 255, 0.25); }
-.ext-png, .ext-jpg, .ext-jpeg, .ext-exr, .ext-webp { background: rgba(0, 240, 202, 0.1); color: var(--teal); border: 1px solid rgba(0, 240, 202, 0.22); }
-.ext-mp4, .ext-mov, .ext-avi { background: rgba(255, 82, 119, 0.1); color: var(--red); border: 1px solid rgba(255, 82, 119, 0.22); }
-.ext-pdf { background: rgba(255, 82, 119, 0.08); color: #ff8fa3; border: 1px solid rgba(255, 82, 119, 0.2); }
-.ext-other { background: var(--card2); color: var(--muted); border: 1px solid var(--b1); }
-
-.fstatus {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.dot-ok { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
-.dot-warn { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
-.dot-err { background: var(--red); box-shadow: 0 0 8px var(--red); }
-
-.text-ok { color: var(--teal); }
-.text-warn { color: var(--amber); }
-.text-err { color: var(--red); }
-
-.btn-prev {
-  background: var(--card2);
-  border: 1px solid var(--b2);
-  color: var(--txt);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 5px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: 'Syne', sans-serif;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-
-.btn-prev:hover {
-  border-color: var(--teal);
-  color: var(--teal);
-  background: rgba(0, 240, 202, 0.05);
-  box-shadow: 0 2px 8px var(--teal-glow);
-}
-
-.no-prev {
-  font-size: 11px;
-  color: var(--muted2);
-  padding-left: 10px;
-}
-
-/* ─── CAT BLOCKS ─── */
-.cat-wrap {
-  margin-bottom: 1.25rem;
-  border-radius: var(--r);
-  overflow: hidden;
-  border: 1px solid var(--b1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.cat-hdr {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  background: var(--card);
-  cursor: pointer;
-  user-select: none;
-  transition: var(--transition);
-}
-
-.cat-hdr:hover {
-  background: var(--card2);
-}
-
-.cat-icon { font-size: 16px; }
-
-.cat-label {
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  flex: 1;
-}
-
-.cat-caret {
-  font-size: 12px;
-  color: var(--muted);
-  transition: transform 0.25s ease;
-  margin-left: 10px;
-}
-
-.cat-hdr.closed .cat-caret {
-  transform: rotate(-90deg);
-}
-
-.cat-body {
-  background: rgba(21, 28, 44, 0.5);
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.cat-body.hidden { display: none; }
-
-.cat-badge {
-  font-size: 11px;
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  padding: 3px 12px;
-  border-radius: 20px;
-}
-
-.cb-ok { background: rgba(0, 240, 202, 0.1); color: var(--teal); border: 1px solid rgba(0, 240, 202, 0.25); }
-.cb-warn { background: rgba(255, 184, 77, 0.1); color: var(--amber); border: 1px solid rgba(255, 184, 77, 0.25); }
-.cb-miss { background: rgba(255, 82, 119, 0.1); color: var(--red); border: 1px solid rgba(255, 82, 119, 0.25); }
-
-.missing-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 18px;
-  border-bottom: 1px solid rgba(34, 47, 70, 0.4);
-  font-size: 13px;
-  color: var(--red);
-  font-weight: 500;
-  background: rgba(255, 82, 119, 0.02);
-}
-
-.missing-row:last-child { border-bottom: none; }
-.missing-exts { margin-left: auto; font-size: 11px; font-family: 'Syne', sans-serif; color: var(--muted); }
-
-/* ─── PREVIEW MODAL ─── */
-.modal-bg {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(5, 7, 10, 0.85);
-  backdrop-filter: blur(12px);
-  z-index: 300;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-bg.open { display: flex; }
-
-.modal {
-  background: var(--surf);
-  border: 1px solid var(--b2);
-  border-radius: 16px;
-  width: min(960px, 94vw);
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-  animation: modalScale 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes modalScale {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.modal-head {
-  padding: 1.25rem 1.75rem;
-  border-bottom: 1px solid var(--b1);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(21, 28, 44, 0.3);
-}
-
-.modal-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--txt);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.modal-sub {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-  font-weight: 500;
-}
-
-.modal-close {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--card2);
-  border: 1px solid var(--b1);
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-  flex-shrink: 0;
-}
-
-.modal-close:hover {
-  background: rgba(255, 82, 119, 0.15);
-  border-color: rgba(255, 82, 119, 0.3);
-  color: var(--red);
-}
-
-.modal-body {
-  flex: 1;
-  overflow: auto;
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 350px;
-  background: #080b11;
-}
-
-/* preview types */
-.prev-img {
-  max-width: 100%;
-  max-height: 60vh;
-  object-fit: contain;
-  border-radius: 8px;
-  display: block;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-}
-
-.prev-3d-wrap {
-  width: 100%;
-  height: 520px;
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #04060a;
-  border: 1px solid var(--b1);
-}
-
-.prev-3d-wrap canvas {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.prev-unsupported {
-  text-align: center;
-  padding: 2.5rem;
-  max-width: 450px;
-}
-
-.prev-unsupported .big-icon {
-  font-size: 56px;
-  display: block;
-  margin-bottom: 1.25rem;
-}
-
-.prev-unsupported h3 {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  margin-bottom: 0.5rem;
-}
-
-.prev-unsupported p {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.prev-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  width: 100%;
-  max-width: 440px;
-}
-
-.prev-info-card {
-  background: var(--card);
-  border: 1px solid var(--b1);
-  border-radius: 8px;
-  padding: 12px 16px;
-  text-align: left;
-}
-
-.prev-info-label {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: 'Syne', sans-serif;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
-  font-weight: 600;
-}
-
-.prev-info-val {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--txt);
-}
-
-/* ─── HINT BOX ─── */
-.hint-box {
-  background: linear-gradient(90deg, rgba(0, 240, 202, 0.06), rgba(77, 166, 255, 0.03));
-  border: 1px solid rgba(0, 240, 202, 0.2);
-  border-radius: var(--r);
-  padding: 1.25rem 1.5rem;
-  font-size: 13px;
-  color: rgba(226, 238, 255, 0.85);
-  line-height: 1.7;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-}
-.hint-box strong { color: var(--teal); font-weight: 600; }
-
-/* ─── LOADING ─── */
-.loading-spin {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--b2);
-  border-top-color: var(--teal);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 3rem auto;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.empty-note {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 500;
-}
-.empty-note .ei { font-size: 42px; display: block; margin-bottom: 1rem; opacity: 0.7; }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 20px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-/* ─── RESPONSIVE ─── */
-@media (max-width: 850px) {
-  .shell { grid-template-columns: 1fr; }
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: var(--sidebar-w);
-    z-index: 160;
-    transform: translateX(-100%);
-    box-shadow: 24px 0 48px rgba(0,0,0,0.4);
-  }
-  .sidebar.open { transform: translateX(0); }
-  .sidebar-overlay { display: block; }
-  .menu-btn { display: flex; }
-  .topbar { padding-left: 4.5rem; padding-right: 1.5rem; }
-  .sumgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .content { padding: 1.5rem; }
-  .cat-badge { display: none; }
-  .cl-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
-}
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Sarabun:wght@300;400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090c;--surf:#0d1117;--card:#111820;--card2:#161f28;
+  --b1:#1e2d3d;--b2:#243444;--b3:#2e4055;
+  --teal:#00e5c0;--blue:#3d9eff;--amber:#ffb340;--red:#ff4d6a;--purple:#a78bfa;--green:#4ade80;
+  --txt:#cce4ff;--muted:#4a6278;--muted2:#2a3d4f;
+  --r:10px; --font-mono:'Syne',monospace; --font-body:'Sarabun','Syne',sans-serif;
+}
+body{font-family:var(--font-body);background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(0,229,192,0.05),transparent),
+  linear-gradient(rgba(0,229,192,.02) 1px,transparent 1px) 0 0/40px 40px,
+  linear-gradient(90deg,rgba(0,229,192,.02) 1px,transparent 1px) 0 0/40px 40px;
+  pointer-events:none;z-index:0}
+
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh;position:relative;z-index:1}
+
+/* SIDEBAR */
+.sidebar{background:var(--surf);border-right:1px solid var(--b1);display:flex;flex-direction:column;padding:0}
+.brand{padding:1.25rem;border-bottom:1px solid var(--b1)}
+.brand-mark{width:38px;height:38px;background:linear-gradient(135deg,rgba(0,229,192,.2),rgba(61,158,255,.2));border:1px solid rgba(0,229,192,.35);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--teal);margin-bottom:.65rem}
+.brand h1{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--txt)}
+.brand p{font-size:11px;color:var(--muted);margin-top:2px}
+.brand-ver{display:inline-block;font-size:9px;font-family:var(--font-mono);background:rgba(0,229,192,.1);border:1px solid rgba(0,229,192,.2);color:var(--teal);padding:1px 7px;border-radius:20px;margin-top:5px}
+
+nav{padding:.75rem 0;flex:1;overflow-y:auto}
+.nav-sec{font-size:9px;font-family:var(--font-mono);letter-spacing:.14em;color:var(--muted);padding:.4rem 1rem .2rem;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 1rem;cursor:pointer;transition:all .15s;border-left:2px solid transparent;font-size:12.5px;color:var(--muted)}
+.nav-item:hover{background:rgba(0,229,192,.04);color:var(--txt)}
+.nav-item.active{background:rgba(0,229,192,.07);border-left-color:var(--teal);color:var(--teal)}
+.nav-ic{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+.nav-lbl{flex:1}
+.nav-badge{font-size:9px;font-family:var(--font-mono);padding:1px 6px;border-radius:20px;border:1px solid}
+.nb-err{background:rgba(255,77,106,.12);color:var(--red);border-color:rgba(255,77,106,.25)}
+.nb-ok{background:rgba(0,229,192,.1);color:var(--teal);border-color:rgba(0,229,192,.2)}
+.nb-warn{background:rgba(255,179,64,.1);color:var(--amber);border-color:rgba(255,179,64,.2)}
+.nb-info{background:rgba(61,158,255,.1);color:var(--blue);border-color:rgba(61,158,255,.2)}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;overflow:hidden;max-height:100vh}
+.topbar{padding:.75rem 1.5rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:.75rem;background:var(--surf);flex-shrink:0}
+.topbar-title{font-family:var(--font-mono);font-size:13px;font-weight:700;flex:1}
+.status-pill{font-size:10px;font-family:var(--font-mono);padding:3px 12px;border-radius:20px;letter-spacing:.04em;border:1px solid;flex-shrink:0}
+.sp-idle{background:var(--card2);border-color:var(--b2);color:var(--muted)}
+.sp-ready{background:rgba(0,229,192,.1);border-color:rgba(0,229,192,.25);color:var(--teal)}
+.sp-warn{background:rgba(255,179,64,.1);border-color:rgba(255,179,64,.25);color:var(--amber)}
+.sp-fail{background:rgba(255,77,106,.1);border-color:rgba(255,77,106,.25);color:var(--red)}
+
+.content{flex:1;overflow-y:auto;padding:1.25rem 1.5rem}
+.page{display:none}.page.active{display:block}
+
+/* JOB INFO */
+.job-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.field-wrap label{font-size:10px;font-family:var(--font-mono);letter-spacing:.08em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px}
+.field-wrap input,.field-wrap select{
+  width:100%;background:var(--card);border:1px solid var(--b1);color:var(--txt);
+  padding:9px 12px;border-radius:8px;font-size:12px;font-family:var(--font-body);
+  outline:none;transition:border-color .2s}
+.field-wrap input:focus,.field-wrap select:focus{border-color:rgba(0,229,192,.4)}
+.field-wrap input::placeholder{color:var(--muted)}
+
+/* DROP */
+.dropzone{
+  border:1.5px dashed var(--b2);border-radius:14px;padding:2.5rem 2rem;
+  text-align:center;cursor:pointer;transition:all .25s;position:relative;
+  background:var(--surf);margin-bottom:1rem}
+.dropzone:hover,.dropzone.over{border-color:var(--teal);background:rgba(0,229,192,.03)}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz-ic{font-size:38px;display:block;margin-bottom:.65rem}
+.dropzone h3{font-family:var(--font-mono);font-size:13px;font-weight:600;margin-bottom:.35rem}
+.dropzone p{font-size:11.5px;color:var(--muted)}
+.dz-tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:.75rem}
+.dz-tag{font-size:9px;font-family:var(--font-mono);background:var(--card);border:1px solid var(--b1);color:var(--muted);padding:2px 7px;border-radius:4px}
+.dz-loaded{font-size:12px;color:var(--teal);margin-top:.5rem;font-family:var(--font-mono)}
+
+/* CHECKLIST */
+.cl-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem}
+.cl-section-hdr p{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.btn-add-cat{font-size:10px;font-family:var(--font-mono);background:transparent;border:1px solid var(--b2);color:var(--muted);padding:3px 10px;border-radius:5px;cursor:pointer;transition:all .15s}
+.btn-add-cat:hover{border-color:var(--teal);color:var(--teal)}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;margin-bottom:1rem}
+.cl-item{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:9px 11px;display:flex;align-items:flex-start;gap:9px;cursor:pointer;transition:all .2s;user-select:none;position:relative}
+.cl-item.on{border-color:rgba(0,229,192,.35);background:rgba(0,229,192,.05)}
+.cl-cb{width:15px;height:15px;border:1.5px solid var(--muted2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:9px;font-weight:700;margin-top:1px}
+.cl-item.on .cl-cb{background:var(--teal);border-color:var(--teal);color:#000}
+.cl-info{flex:1;min-width:0}
+.cl-name{font-size:11.5px;font-weight:500}
+.cl-ext{font-size:10px;color:var(--muted);font-family:var(--font-mono);margin-top:2px;word-break:break-all}
+.cl-del{position:absolute;top:6px;right:6px;font-size:11px;color:var(--muted2);cursor:pointer;opacity:0;transition:opacity .15s}
+.cl-item:hover .cl-del{opacity:1}
+.cl-del:hover{color:var(--red)!important}
+
+/* BUTTONS */
+.btn-scan{width:100%;padding:12px;background:linear-gradient(90deg,rgba(0,229,192,.12),rgba(61,158,255,.12));border:1px solid rgba(0,229,192,.3);border-radius:9px;color:var(--teal);font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.12em;cursor:pointer;transition:all .2s;margin-bottom:1.25rem}
+.btn-scan:hover{background:linear-gradient(90deg,rgba(0,229,192,.22),rgba(61,158,255,.22))}
+.btn-scan:disabled{opacity:.3;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;margin-bottom:1.25rem}
+.btn-sm{flex:1;padding:9px 12px;background:var(--card);border:1px solid var(--b1);border-radius:7px;color:var(--muted);font-size:11px;font-family:var(--font-mono);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-sm:hover{border-color:var(--teal);color:var(--teal)}
+.btn-sm.danger:hover{border-color:var(--red);color:var(--red)}
+.btn-primary{background:rgba(0,229,192,.1);border-color:rgba(0,229,192,.3);color:var(--teal)}
+
+/* SUMMARY */
+.sumgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.25rem}
+.scard{background:var(--card);border:1px solid var(--b1);border-radius:9px;padding:.85rem;text-align:center}
+.snum{font-family:var(--font-mono);font-size:26px;font-weight:700;line-height:1;margin-bottom:2px}
+.snum.tc{color:var(--teal)}.snum.ta{color:var(--amber)}.snum.tr{color:var(--red)}.snum.tb{color:var(--blue)}.snum.tp{color:var(--purple)}
+.slbl{font-size:10px;color:var(--muted)}
+
+.result-banner{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:10px;margin-bottom:1.25rem;font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.04em}
+.rb-ok{background:rgba(0,229,192,.08);border:1px solid rgba(0,229,192,.2);color:var(--teal)}
+.rb-warn{background:rgba(255,179,64,.08);border:1px solid rgba(255,179,64,.2);color:var(--amber)}
+.rb-fail{background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2);color:var(--red)}
+
+/* TABLE */
+.cat-wrap{margin-bottom:.85rem}
+.cat-hdr{display:flex;align-items:center;gap:9px;padding:10px 13px;background:var(--card);border:1px solid var(--b1);border-radius:9px 9px 0 0;cursor:pointer;user-select:none}
+.cat-hdr.closed{border-radius:9px}
+.cat-ic{font-size:14px}.cat-lbl{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.05em;flex:1}
+.cat-stat{font-size:10px}.cat-cnt{font-size:10px;color:var(--muted);margin-left:4px}
+.cat-caret{font-size:10px;color:var(--muted);transition:transform .2s;margin-left:4px}
+.cat-hdr.closed .cat-caret{transform:rotate(-90deg)}
+.cat-body{background:var(--card);border:1px solid var(--b1);border-top:none;border-radius:0 0 9px 9px;overflow:hidden}
+.cat-body.hidden{display:none}
+
+.ftable{width:100%;border-collapse:collapse;font-size:11.5px}
+.ftable th{text-align:left;font-family:var(--font-mono);font-size:9px;letter-spacing:.09em;color:var(--muted);padding:7px 10px;border-bottom:1px solid var(--b1);background:var(--surf);position:sticky;top:0;z-index:2}
+.ftable td{padding:8px 10px;border-bottom:1px solid rgba(30,45,61,.4);vertical-align:middle}
+.ftable tr:last-child td{border-bottom:none}
+.ftable tr:hover td{background:rgba(0,229,192,.025)}
+.fname{font-family:var(--font-mono);font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.fpath-cell{font-size:9.5px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fsize-cell{font-family:var(--font-mono);font-size:10px;color:var(--muted);white-space:nowrap}
+
+.ext-badge{font-family:var(--font-mono);font-size:9px;padding:2px 7px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.ex-blend{background:rgba(255,179,64,.12);color:var(--amber);border:1px solid rgba(255,179,64,.2)}
+.ex-fbx,.ex-obj,.ex-abc,.ex-gltf,.ex-glb{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.ex-ai,.ex-eps{background:rgba(61,158,255,.12);color:var(--blue);border:1px solid rgba(61,158,255,.2)}
+.ex-psd{background:rgba(61,158,255,.1);color:#7eb8ff;border:1px solid rgba(61,158,255,.18)}
+.ex-png,.ex-jpg,.ex-jpeg,.ex-webp,.ex-tga,.ex-tif,.ex-tiff{background:rgba(0,229,192,.1);color:var(--teal);border:1px solid rgba(0,229,192,.18)}
+.ex-exr,.ex-hdr{background:rgba(0,229,192,.07);color:#5ff0d8;border:1px solid rgba(0,229,192,.15)}
+.ex-mp4,.ex-mov,.ex-avi{background:rgba(255,77,106,.1);color:var(--red);border:1px solid rgba(255,77,106,.18)}
+.ex-pdf{background:rgba(255,77,106,.07);color:#ff8fa3;border:1px solid rgba(255,77,106,.12)}
+.ex-aep,.ex-prproj{background:rgba(61,158,255,.08);color:#9bc8ff;border:1px solid rgba(61,158,255,.15)}
+.ex-other{background:var(--card2);color:var(--muted);border:1px solid var(--b1)}
+
+.fstatus{display:flex;align-items:center;gap:5px;font-size:10.5px;white-space:nowrap}
+.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--teal)}.dot-warn{background:var(--amber)}.dot-err{background:var(--red)}
+.text-ok{color:var(--teal)}.text-warn{color:var(--amber)}.text-err{color:var(--red)}
+.btn-prev{background:var(--card2);border:1px solid var(--b2);color:var(--muted);font-size:9.5px;padding:3px 9px;border-radius:4px;cursor:pointer;font-family:var(--font-mono);transition:all .15s;white-space:nowrap}
+.btn-prev:hover{border-color:var(--teal);color:var(--teal);background:rgba(0,229,192,.06)}
+
+/* MISSING */
+.miss-row{display:flex;align-items:center;gap:8px;padding:8px 13px;border-bottom:1px solid rgba(30,45,61,.4);font-size:11.5px;color:var(--red)}
+.miss-row:last-child{border-bottom:none}
+
+/* TREE */
+.tree-wrap{font-family:var(--font-mono);font-size:11px;line-height:1.9;color:var(--txt)}
+.tree-node{display:flex;align-items:center;gap:6px;padding:1px 0}
+.tree-node:hover{background:rgba(0,229,192,.04);border-radius:4px;cursor:pointer}
+.tree-dir{color:var(--blue);font-weight:600}
+.tree-file{color:var(--txt)}
+.tree-indent{color:var(--muted2);flex-shrink:0}
+.tree-size{color:var(--muted);font-size:10px;margin-left:auto}
+
+/* HISTORY */
+.hist-item{background:var(--card);border:1px solid var(--b1);border-radius:9px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.hist-item:hover{border-color:var(--b3)}
+.hist-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.hist-name{font-family:var(--font-mono);font-size:11.5px;font-weight:700;flex:1}
+.hist-date{font-size:10px;color:var(--muted)}
+.hist-meta{font-size:11px;color:var(--muted);display:flex;gap:12px}
+.hist-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* PREVIEW MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(7,9,12,.9);backdrop-filter:blur(10px);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surf);border:1px solid var(--b2);border-radius:14px;width:min(920px,95vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-head{padding:.85rem 1.15rem;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.modal-title{font-family:var(--font-mono);font-size:12px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-sub{font-size:10px;color:var(--muted)}
+.modal-close{width:26px;height:26px;border-radius:5px;background:var(--card2);border:1px solid var(--b1);cursor:pointer;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.modal-close:hover{background:rgba(255,77,106,.15);border-color:rgba(255,77,106,.3);color:var(--red)}
+.modal-body{flex:1;overflow:auto;padding:1.15rem;display:flex;align-items:center;justify-content:center;min-height:280px}
+
+.prev-img{max-width:100%;max-height:68vh;object-fit:contain;border-radius:6px;display:block}
+.prev-3d{width:100%;height:480px;border-radius:10px;overflow:hidden;background:#060a0e;border:1px solid var(--b1);position:relative}
+.prev-3d canvas{display:block}
+.prev-3d-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;font-family:var(--font-mono);color:rgba(0,229,192,.5);background:rgba(6,10,14,.8);padding:4px 12px;border-radius:20px;white-space:nowrap;pointer-events:none}
+.prev-info{width:100%;max-width:480px}
+.prev-info-icon{font-size:52px;text-align:center;display:block;margin-bottom:.85rem}
+.prev-info-title{font-family:var(--font-mono);font-size:14px;font-weight:600;text-align:center;margin-bottom:.35rem}
+.prev-info-sub{font-size:11.5px;color:var(--muted);text-align:center;margin-bottom:1.15rem}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-card{background:var(--card);border:1px solid var(--b1);border-radius:8px;padding:.75rem}
+.info-lbl{font-size:9.5px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.06em;margin-bottom:3px;text-transform:uppercase}
+.info-val{font-family:var(--font-mono);font-size:12.5px;font-weight:600}
+.info-note{margin-top:.85rem;padding:10px 13px;border-radius:8px;font-size:11.5px;line-height:1.7}
+.note-teal{background:rgba(0,229,192,.06);border:1px solid rgba(0,229,192,.18);color:rgba(0,229,192,.85)}
+.note-blue{background:rgba(61,158,255,.06);border:1px solid rgba(61,158,255,.18);color:rgba(61,158,255,.85)}
+
+/* ADD CAT MODAL */
+.mini-modal{background:var(--surf);border:1px solid var(--b2);border-radius:12px;width:400px;padding:1.25rem}
+.mini-modal h3{font-family:var(--font-mono);font-size:13px;font-weight:700;margin-bottom:1rem}
+.mini-field{margin-bottom:.85rem}
+.mini-field label{font-size:10px;font-family:var(--font-mono);color:var(--muted);display:block;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.mini-field input{width:100%;background:var(--card);border:1px solid var(--b1);color:var(--txt);padding:8px 11px;border-radius:7px;font-size:12px;font-family:var(--font-body);outline:none;transition:border-color .2s}
+.mini-field input:focus{border-color:rgba(0,229,192,.4)}
+
+/* PREVIEW BROWSER */
+.prev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px}
+.prev-thumb{background:var(--card);border:1px solid var(--b1);border-radius:9px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.prev-thumb:hover{border-color:rgba(0,229,192,.35)}
+.thumb-img{height:85px;background:var(--card2);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.thumb-img img{width:100%;height:85px;object-fit:cover}
+.thumb-info{padding:7px 8px}
+.thumb-name{font-family:var(--font-mono);font-size:9.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb-size{font-size:9.5px;color:var(--muted);margin-top:2px}
+
+/* HINT */
+.hint{background:rgba(0,229,192,.05);border:1px solid rgba(0,229,192,.15);border-radius:9px;padding:.85rem 1.1rem;font-size:11.5px;color:rgba(0,229,192,.8);line-height:1.75;margin-bottom:1rem}
+.hint strong{color:var(--teal)}
+
+/* LOADING */
+.spin{width:32px;height:32px;border:2px solid var(--b2);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:2rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:2.5rem;color:var(--muted);font-size:12px}
+.empty span{font-size:32px;display:block;margin-bottom:.65rem}
+
+/* SCAN PROGRESS */
+.prog-bar-wrap{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-bottom:.75rem;display:none}
+.prog-bar-wrap.show{display:block}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));width:0%;transition:width .15s}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
 </style>
 </head>
 <body>
-
-<button class="menu-btn" id="menuBtn" aria-label="เปิดเมนู">☰</button>
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
 <div class="shell">
 
-<aside class="sidebar" id="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar">
   <div class="brand">
     <div class="brand-mark">AC</div>
     <h1>ASSET CHECKER</h1>
     <p>3D · Blender · After Effects</p>
+    <span class="brand-ver">v2.0 COMPLETE</span>
   </div>
   <nav>
-    <div class="nav-section">Tools</div>
-    <div class="nav-item active" data-page="scan">
-      <span class="nav-icon">🔍</span> Scan Files
+    <div class="nav-sec">Workflow</div>
+    <div class="nav-item active" data-page="scan" onclick="showPage('scan')">
+      <span class="nav-ic">🔍</span><span class="nav-lbl">Scan Files</span>
     </div>
-    <div class="nav-item" data-page="results" id="nav-results">
-      <span class="nav-icon">📋</span> Results
-      <span class="nav-badge" id="badge-results" style="display:none">—</span>
+    <div class="nav-item" data-page="results" onclick="showPage('results')">
+      <span class="nav-ic">📋</span><span class="nav-lbl">Results</span>
+      <span class="nav-badge nb-err" id="nb-results" style="display:none">!</span>
     </div>
-    <div class="nav-item" data-page="preview" id="nav-preview">
-      <span class="nav-icon">👁</span> File Browser
+    <div class="nav-item" data-page="tree" onclick="showPage('tree')">
+      <span class="nav-ic">🌲</span><span class="nav-lbl">Folder Tree</span>
+      <span class="nav-badge nb-info" id="nb-tree" style="display:none">—</span>
     </div>
-    <div class="nav-section">Info</div>
-    <div class="nav-item" data-page="guide">
-      <span class="nav-icon">📖</span> Guide
+    <div class="nav-item" data-page="browser" onclick="showPage('browser')">
+      <span class="nav-ic">👁</span><span class="nav-lbl">File Preview</span>
+      <span class="nav-badge nb-info" id="nb-browser" style="display:none">—</span>
+    </div>
+    <div class="nav-sec">Data</div>
+    <div class="nav-item" data-page="history" onclick="showPage('history')">
+      <span class="nav-ic">🕐</span><span class="nav-lbl">Scan History</span>
+      <span class="nav-badge nb-info" id="nb-history" style="display:none">0</span>
+    </div>
+    <div class="nav-item" data-page="settings" onclick="showPage('settings')">
+      <span class="nav-ic">⚙️</span><span class="nav-lbl">Settings</span>
     </div>
   </nav>
 </aside>
 
+<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <h2 id="topbar-title">Scan Files</h2>
-    <div class="topbar-actions">
-      <span class="status-pill pill-idle" id="status-pill">รอสแกน</span>
-    </div>
+    <div class="topbar-title" id="page-title">Scan Files</div>
+    <span class="status-pill sp-idle" id="status-pill">รอสแกน</span>
   </div>
   <div class="content">
 
+    <!-- PAGE SCAN -->
     <div class="page active" id="page-scan">
-      <div class="hint-box">
-        <strong>วิธีใช้:</strong> ลาก folder งานของลูกค้ามาวางด้านล่าง หรือคลิกเพื่อเลือก — ระบบจะสแกนไฟล์ทั้งหมด เช็คความครบถ้วน นามสกุล และขนาด พร้อม preview ได้เลยในบราวเซอร์
+      <div class="hint">
+        <strong>🗂 Deep Folder Scan</strong> — ลาก folder งานของลูกค้ามาวาง สแกนได้ลึกไม่จำกัดชั้น · รองรับทุก subfolder structure
       </div>
-
-      <div class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" multiple accept="*/*" webkitdirectory aria-label="เลือกไฟล์">
-        <span class="dz-icon">📂</span>
-        <h3 id="dz-title">ลาก Folder งานมาวางที่นี่</h3>
-        <p id="dz-sub">หรือคลิกเพื่อเลือกไฟล์ · รองรับทุกนามสกุล</p>
-        <div class="dz-hint">
-          <span class="dz-tag">.blend</span><span class="dz-tag">.fbx</span>
-          <span class="dz-tag">.obj</span><span class="dz-tag">.psd</span>
-          <span class="dz-tag">.ai</span><span class="dz-tag">.png</span>
-          <span class="dz-tag">.exr</span><span class="dz-tag">.mp4</span>
-          <span class="dz-tag">.pdf</span>
+      <div class="job-row">
+        <div class="field-wrap"><label>ชื่องาน / Job Name</label><input type="text" id="jobName" placeholder="e.g. CAR_ANIMATION_v3"></div>
+        <div class="field-wrap"><label>ชื่อลูกค้า / Client</label><input type="text" id="clientName" placeholder="e.g. Toyota Thailand"></div>
+        <div class="field-wrap"><label>Deadline</label><input type="date" id="deadline"></div>
+        <div class="field-wrap"><label>Priority</label>
+          <select id="priority">
+            <option value="normal">🟢 Normal</option>
+            <option value="urgent">🟡 Urgent</option>
+            <option value="critical">🔴 Critical</option>
+          </select>
         </div>
       </div>
-
-      <span class="section-lbl">เลือกหมวดที่ต้องเช็ค</span>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" multiple webkitdirectory>
+        <span class="dz-ic">📂</span>
+        <h3>ลาก Folder งานมาวางที่นี่</h3>
+        <p>รองรับ deep folder structure · สแกนลึกไม่จำกัดชั้น</p>
+        <div id="dz-loaded" class="dz-loaded" style="display:none"></div>
+        <div class="dz-tags">
+          <span class="dz-tag">.blend</span><span class="dz-tag">.fbx</span><span class="dz-tag">.obj</span>
+          <span class="dz-tag">.psd</span><span class="dz-tag">.ai</span><span class="dz-tag">.aep</span>
+          <span class="dz-tag">.png</span><span class="dz-tag">.exr</span><span class="dz-tag">.mp4</span><span class="dz-tag">.pdf</span>
+        </div>
+      </div>
+      <div class="cl-section-hdr">
+        <p>Checklist หมวดที่ต้องการเช็ค</p>
+        <button class="btn-add-cat" onclick="openAddCat()">+ เพิ่มหมวด</button>
+      </div>
       <div class="cl-grid" id="clGrid"></div>
+      <div class="prog-bar-wrap" id="progWrap"><div class="prog-bar" id="progBar"></div></div>
       <button class="btn-scan" id="btnScan" disabled onclick="runScan()">▶ RUN SCAN</button>
     </div>
 
+    <!-- PAGE RESULTS -->
     <div class="page" id="page-results">
-      <div class="sumgrid" id="sumGrid">
+      <div id="resultJobInfo" style="margin-bottom:1rem;font-size:12px;color:var(--muted)"></div>
+      <div class="sumgrid">
         <div class="scard"><div class="snum tb" id="s-total">0</div><div class="slbl">ไฟล์ทั้งหมด</div></div>
         <div class="scard"><div class="snum tc" id="s-ok">0</div><div class="slbl">ผ่าน</div></div>
         <div class="scard"><div class="snum ta" id="s-warn">0</div><div class="slbl">เตือน</div></div>
-        <div class="scard"><div class="snum tr" id="s-miss">0</div><div class="slbl">หมวดหายไป</div></div>
+        <div class="scard"><div class="snum tr" id="s-miss">0</div><div class="slbl">หมวดขาด</div></div>
+        <div class="scard"><div class="snum tp" id="s-depth">0</div><div class="slbl">Folder ลึกสุด</div></div>
       </div>
-      <div class="results-toolbar" id="resultsToolbar">
-        <button class="filter-btn active" data-filter="all">ทั้งหมด</button>
-        <button class="filter-btn" data-filter="warn">⚠ เตือน</button>
-        <button class="filter-btn" data-filter="err">✕ Error</button>
-        <button class="filter-btn" data-filter="ok">✓ ผ่าน</button>
-        <button class="export-btn" id="btnExport" onclick="exportCSV()">⬇ Export CSV</button>
+      <div id="resultBanner" class="result-banner rb-ok" style="display:none"></div>
+      <div class="btn-row">
+        <button class="btn-sm btn-primary" onclick="exportPDF()">📄 Export PDF</button>
+        <button class="btn-sm" onclick="exportCSV()">📊 Export CSV</button>
+        <button class="btn-sm" onclick="exportJSON()">🗃 Export JSON</button>
+        <button class="btn-sm danger" onclick="clearResults()">🗑 Clear</button>
       </div>
       <div id="resultBody"></div>
     </div>
 
-    <div class="page" id="page-preview">
-      <div id="previewBrowser"></div>
+    <!-- PAGE TREE -->
+    <div class="page" id="page-tree">
+      <div class="btn-row" style="margin-bottom:1rem">
+        <button class="btn-sm" onclick="expandAll()">⊞ Expand All</button>
+        <button class="btn-sm" onclick="collapseAll()">⊟ Collapse All</button>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--b1);border-radius:10px;padding:1rem;overflow-x:auto">
+        <div id="treeBody" class="tree-wrap"></div>
+      </div>
     </div>
 
-    <div class="page" id="page-guide">
-      <div style="max-width:650px">
-        <span class="section-lbl">สิ่งที่ระบบเช็ค</span>
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:2rem">
-          <div class="scard" style="text-align:left">
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--teal);margin-bottom:6px">✅ ครบไฟล์ตาม Checklist</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.7">ตรวจสอบว่ามีไฟล์ครบทุกหมวดที่เปิดใช้งาน เช่น มี Reference, Model, Texture, Render ครบไหม</div>
-          </div>
-          <div class="scard" style="text-align:left">
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px">🔖 นามสกุลไฟล์</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.7">เช็คว่านามสกุลไฟล์ตรงกับหมวดที่กำหนดไว้ เช่น หมวด Model ต้องเป็น .blend / .fbx / .obj เท่านั้น</div>
-          </div>
-          <div class="scard" style="text-align:left">
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--amber);margin-bottom:6px">⚖️ ขนาดไฟล์</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.7">ไฟล์เล็กกว่า threshold ตามหมวด = เตือน (อาจว่างเปล่า) · ไฟล์ขนาด 0 bytes = Error</div>
-          </div>
-          <div class="scard" style="text-align:left">
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px">👁 Preview ในบราวเซอร์</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.7">
-              <strong style="color:var(--txt)">รูปภาพ</strong> (PNG, JPG, WEBP, GIF) — แสดงภาพได้เลย<br>
-              <strong style="color:var(--txt)">3D Model</strong> (OBJ) — viewer หมุนได้ใน browser<br>
-              <strong style="color:var(--txt)">PSD / AI</strong> — แสดงข้อมูล header, ขนาด, วันที่แก้ไข<br>
-              <strong style="color:var(--txt)">วิดีโอ</strong> (MP4, MOV) — เล่นได้ในหน้าต่าง<br>
-              <strong style="color:var(--txt)">PDF</strong> — เปิดอ่านในบราวเซอร์
-            </div>
-          </div>
-          <div class="scard" style="text-align:left">
-            <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--amber);margin-bottom:6px">⬇ Export Report</div>
-            <div style="font-size:13px;color:var(--muted);line-height:1.7">กดปุ่ม Export CSV ในหน้า Results เพื่อ download รายงานผลการสแกน — นำไปส่งลูกค้าหรือทีมได้เลย</div>
-          </div>
+    <!-- PAGE BROWSER -->
+    <div class="page" id="page-browser">
+      <div id="filterBar" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1rem" id="extFilters"></div>
+      <div id="browserGrid" class="prev-grid"></div>
+    </div>
+
+    <!-- PAGE HISTORY -->
+    <div class="page" id="page-history">
+      <div class="btn-row">
+        <button class="btn-sm danger" onclick="clearHistory()">🗑 ล้าง History ทั้งหมด</button>
+      </div>
+      <div id="histBody"></div>
+    </div>
+
+    <!-- PAGE SETTINGS -->
+    <div class="page" id="page-settings">
+      <div style="max-width:560px">
+        <div class="hint" style="margin-bottom:1.25rem">⚙️ ตั้งค่าเริ่มต้นสำหรับทีม — บันทึกอัตโนมัติลง browser</div>
+        <div class="field-wrap" style="margin-bottom:1rem">
+          <label>Studio / ชื่อทีม</label>
+          <input type="text" id="settingStudio" placeholder="e.g. Sunbeam Creative" oninput="saveSettings()">
+        </div>
+        <div class="field-wrap" style="margin-bottom:1rem">
+          <label>ขนาดไฟล์ขั้นต่ำที่เตือน (KB)</label>
+          <input type="number" id="settingMinKB" value="1" oninput="saveSettings()">
+        </div>
+        <div class="field-wrap" style="margin-bottom:1rem">
+          <label>เตือนเมื่อไฟล์ใหญ่เกิน (MB) — 0 = ไม่เตือน</label>
+          <input type="number" id="settingMaxMB" value="0" oninput="saveSettings()">
+        </div>
+        <div class="hint note-blue" style="margin-top:1rem">
+          <strong style="color:var(--blue)">🔒 Privacy:</strong> ไฟล์ทั้งหมดประมวลผลใน browser เท่านั้น — ไม่มีการ upload ไปไหน · ปลอดภัย 100%
         </div>
       </div>
     </div>
@@ -1128,798 +405,760 @@ nav {
 </div>
 </div>
 
-<div class="modal-bg" id="modalBg" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<!-- PREVIEW MODAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-head">
       <div style="flex:1;min-width:0">
-        <div class="modal-title" id="modalTitle">—</div>
-        <div class="modal-sub" id="modalSub">—</div>
+        <div class="modal-title" id="modal-title">—</div>
+        <div class="modal-sub" id="modal-sub">—</div>
       </div>
-      <button class="modal-close" onclick="closeModal()" aria-label="ปิด">✕</button>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-body" id="modal-body"><div class="spin"></div></div>
+  </div>
+</div>
+
+<!-- ADD CAT MODAL -->
+<div class="modal-bg" id="addCatModal" onclick="if(event.target===this)closeAddCat()">
+  <div class="mini-modal">
+    <h3>➕ เพิ่มหมวดใหม่</h3>
+    <div class="mini-field"><label>ชื่อหมวด</label><input type="text" id="newCatName" placeholder="e.g. Sound FX"></div>
+    <div class="mini-field"><label>Icon (emoji)</label><input type="text" id="newCatIcon" placeholder="🎵" maxlength="2"></div>
+    <div class="mini-field"><label>นามสกุลไฟล์ (คั่นด้วย comma)</label><input type="text" id="newCatExts" placeholder=".wav, .mp3, .aif"></div>
+    <div class="mini-field"><label>ขนาดขั้นต่ำที่คาดหวัง (KB)</label><input type="number" id="newCatMin" value="1"></div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <button class="btn-sm btn-primary" style="flex:1" onclick="confirmAddCat()">✓ เพิ่ม</button>
+      <button class="btn-sm" style="flex:1" onclick="closeAddCat()">ยกเลิก</button>
+    </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════════════
-const CATEGORIES = [
-  {id:'reference', name:'Reference / Brief',  icon:'🗂', exts:['.jpg','.jpeg','.png','.pdf','.webp','.gif','.bmp'], minSize:1024,  required:true},
-  {id:'model',     name:'3D Model',           icon:'📦', exts:['.blend','.fbx','.obj','.abc','.gltf','.glb'],        minSize:5120,  required:true},
-  {id:'texture',   name:'Texture / Material', icon:'🎨', exts:['.png','.jpg','.jpeg','.exr','.hdr','.tga','.tif','.tiff','.psd','.webp'], minSize:1024, required:true},
-  {id:'render',    name:'Render Output',      icon:'🖼', exts:['.png','.jpg','.jpeg','.exr','.mp4','.mov','.avi'],   minSize:50000, required:false},
-  {id:'project',   name:'Project File',       icon:'🗃', exts:['.blend','.aep','.prproj','.c4d','.ma','.mb'],        minSize:10240, required:true},
-  {id:'document',  name:'Document',           icon:'📄', exts:['.pdf','.docx','.xlsx','.pptx','.txt'],               minSize:512,   required:false},
+// ═══════════════════════ STATE ═══════════════════════
+const DEFAULT_CATS = [
+  {id:'ref',   name:'Reference / Brief',  icon:'🗂', exts:['.jpg','.jpeg','.png','.pdf','.webp','.gif','.bmp','.tif','.tiff'],minKB:1,   required:true},
+  {id:'model', name:'3D Model',            icon:'📦', exts:['.blend','.fbx','.obj','.abc','.gltf','.glb'],                    minKB:5,   required:true},
+  {id:'tex',   name:'Texture / Material',  icon:'🎨', exts:['.png','.jpg','.jpeg','.exr','.hdr','.tga','.tif','.tiff','.psd','.webp'],minKB:1,required:true},
+  {id:'render',name:'Render Output',       icon:'🖼', exts:['.png','.jpg','.jpeg','.exr','.mp4','.mov','.avi'],               minKB:50,  required:false},
+  {id:'proj',  name:'Project File',        icon:'🗃', exts:['.blend','.aep','.prproj','.c4d','.ma','.mb'],                   minKB:10,  required:true},
+  {id:'doc',   name:'Document',            icon:'📄', exts:['.pdf','.docx','.xlsx','.pptx','.txt'],                          minKB:1,   required:false},
 ];
-
+let cats = JSON.parse(localStorage.getItem('ac_cats')||'null') || DEFAULT_CATS.map(c=>({...c,active:c.required}));
 let allFiles = [];
-let scanResults = [];
-let missingCats = [];
-let activeChecks = new Set(CATEGORIES.filter(c => c.required).map(c => c.id));
-let currentFilter = 'all';
+let lastScan = null;
+let settings = JSON.parse(localStorage.getItem('ac_settings')||'{}');
 
-// Track object URLs for cleanup
-const objectURLs = new Set();
-
-function createObjectURL(file) {
-  const url = URL.createObjectURL(file);
-  objectURLs.add(url);
-  return url;
-}
-
-function revokeObjectURL(url) {
-  if (url && objectURLs.has(url)) {
-    URL.revokeObjectURL(url);
-    objectURLs.delete(url);
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════
-function init() {
+// ═══════════════════════ INIT ═══════════════════════
+function init(){
   buildChecklist();
   setupDrop();
-  setupNav();
-  setupMobileMenu();
-  setupFilterButtons();
-
-  // Keyboard: Escape closes modal
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
-  });
+  loadHistoryBadge();
+  loadSettings();
+  renderHistory();
+  // set today as default deadline
+  document.getElementById('deadline').value = new Date().toISOString().split('T')[0];
 }
 
-// ═══════════════════════════════════════════════════
-// NAV — data-page based, no fragile text matching
-// ═══════════════════════════════════════════════════
-function setupNav() {
-  document.querySelectorAll('.nav-item[data-page]').forEach(item => {
-    item.addEventListener('click', () => showPage(item.dataset.page));
-  });
+function saveSettings(){
+  settings.studio = document.getElementById('settingStudio').value;
+  settings.minKB = parseFloat(document.getElementById('settingMinKB').value)||1;
+  settings.maxMB = parseFloat(document.getElementById('settingMaxMB').value)||0;
+  localStorage.setItem('ac_settings', JSON.stringify(settings));
+}
+function loadSettings(){
+  if(settings.studio) document.getElementById('settingStudio').value = settings.studio;
+  if(settings.minKB) document.getElementById('settingMinKB').value = settings.minKB;
+  if(settings.maxMB !== undefined) document.getElementById('settingMaxMB').value = settings.maxMB;
 }
 
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-  const page = document.getElementById('page-' + id);
-  if (page) page.classList.add('active');
-
-  const navItem = document.querySelector(`.nav-item[data-page="${id}"]`);
-  if (navItem) navItem.add('active');
-
-  const titles = { scan: 'Scan Files', results: 'Scan Results', preview: 'File Browser', guide: 'How It Works' };
-  document.getElementById('topbar-title').textContent = titles[id] || id;
-
-  // Close mobile sidebar when navigating
-  closeMobileSidebar();
-}
-
-// ═══════════════════════════════════════════════════
-// MOBILE MENU
-// ═══════════════════════════════════════════════════
-function setupMobileMenu() {
-  const btn = document.getElementById('menuBtn');
-  const overlay = document.getElementById('sidebarOverlay');
-  btn.addEventListener('click', toggleMobileSidebar);
-  overlay.addEventListener('click', closeMobileSidebar);
-}
-
-function toggleMobileSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
-
-function closeMobileSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-}
-
-// ═══════════════════════════════════════════════════
-// CHECKLIST
-// ═══════════════════════════════════════════════════
-function buildChecklist() {
+// ═══════════════════════ CHECKLIST ═══════════════════════
+function buildChecklist(){
+  saveCats();
   const g = document.getElementById('clGrid');
-  g.innerHTML = CATEGORIES.map(c => `
-    <div class="cl-item ${activeChecks.has(c.id) ? 'on' : ''}" role="checkbox"
-         aria-checked="${activeChecks.has(c.id)}"
-         onclick="toggleChecklistItem('${c.id}', this)">
-      <div class="cl-box">${activeChecks.has(c.id) ? '✓' : ''}</div>
+  g.innerHTML = cats.map((c,i)=>`
+    <div class="cl-item ${c.active?'on':''}" onclick="toggleCat(${i},this)">
+      <div class="cl-cb">${c.active?'✓':''}</div>
       <div class="cl-info">
         <div class="cl-name">${c.icon} ${c.name}</div>
-        <div class="cl-ext">${c.exts.slice(0, 4).join(' ')}</div>
+        <div class="cl-ext">${c.exts.slice(0,5).join(' ')}</div>
       </div>
+      <span class="cl-del" onclick="event.stopPropagation();deleteCat(${i})">✕</span>
     </div>`).join('');
 }
-
-function toggleChecklistItem(id, el) {
-  if (activeChecks.has(id)) {
-    activeChecks.delete(id);
-    el.classList.remove('on');
-    el.setAttribute('aria-checked', 'false');
-    el.querySelector('.cl-box').textContent = '';
-  } else {
-    activeChecks.add(id);
-    el.classList.add('on');
-    el.setAttribute('aria-checked', 'true');
-    el.querySelector('.cl-box').textContent = '✓';
-  }
+function toggleCat(i,el){
+  cats[i].active = !cats[i].active;
+  el.classList.toggle('on',cats[i].active);
+  el.querySelector('.cl-cb').textContent = cats[i].active?'✓':'';
+  saveCats();
+}
+function deleteCat(i){ cats.splice(i,1); buildChecklist(); }
+function saveCats(){ localStorage.setItem('ac_cats', JSON.stringify(cats)); }
+function openAddCat(){ document.getElementById('addCatModal').classList.add('open'); }
+function closeAddCat(){ document.getElementById('addCatModal').classList.remove('open'); }
+function confirmAddCat(){
+  const name = document.getElementById('newCatName').value.trim();
+  const icon = document.getElementById('newCatIcon').value.trim()||'📁';
+  const extsRaw = document.getElementById('newCatExts').value;
+  const minKB = parseFloat(document.getElementById('newCatMin').value)||1;
+  if(!name) return;
+  const exts = extsRaw.split(',').map(e=>e.trim().replace(/^([^.])/, '.$1').toLowerCase()).filter(Boolean);
+  cats.push({id:'custom_'+Date.now(),name,icon,exts,minKB,required:false,active:true});
+  buildChecklist();
+  closeAddCat();
+  ['newCatName','newCatIcon','newCatExts'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('newCatMin').value='1';
 }
 
-// ═══════════════════════════════════════════════════
-// DROP / INPUT
-// ═══════════════════════════════════════════════════
-function setupDrop() {
+// ═══════════════════════ DROP ═══════════════════════
+function setupDrop(){
   const dz = document.getElementById('dropzone');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('over');
-    const files = [...e.dataTransfer.files].filter(f => f.size !== undefined);
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.classList.remove('over');
+    let files = [];
+    const items = e.dataTransfer.items;
+    if(items && items.length){
+      const promises = [];
+      for(let i=0;i<items.length;i++){
+        const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+        if(entry) promises.push(traverseEntry(entry, ''));
+      }
+      Promise.all(promises).then(arrs=>{
+        files = arrs.flat().filter(f=>!f.file.name.startsWith('.'));
+        loadFiles(files);
+      });
+    } else {
+      files = [...e.dataTransfer.files].filter(f=>!f.name.startsWith('.')).map(f=>({file:f,path:f.name}));
+      loadFiles(files);
+    }
+  });
+  document.getElementById('fileInput').addEventListener('change',e=>{
+    const files = [...e.target.files].filter(f=>!f.name.startsWith('.')).map(f=>({
+      file:f,
+      path: f.webkitRelativePath||f.name
+    }));
     loadFiles(files);
   });
-  document.getElementById('fileInput').addEventListener('change', e => {
-    loadFiles([...e.target.files]);
+}
+
+function traverseEntry(entry, basePath){
+  return new Promise(resolve=>{
+    if(entry.isFile){
+      entry.file(f=>{
+        if(!f.name.startsWith('.')) resolve([{file:f, path:(basePath?basePath+'/':'')+f.name}]);
+        else resolve([]);
+      });
+    } else if(entry.isDirectory){
+      const reader = entry.createReader();
+      const readAll = (acc)=>{
+        reader.readEntries(entries=>{
+          if(!entries.length){ 
+            Promise.all(acc).then(arrs=>resolve(arrs.flat()));
+            return;
+          }
+          const promises = entries.map(e=>traverseEntry(e,(basePath?basePath+'/':'')+entry.name));
+          readAll([...acc, ...promises]);
+        });
+      };
+      readAll([]);
+    } else resolve([]);
   });
 }
 
-function loadFiles(files) {
-  // Filter hidden files (start with .)
-  allFiles = files.filter(f => !f.name.startsWith('.'));
-  if (!allFiles.length) return;
-
-  // Reset scan state when new files loaded
-  scanResults = [];
-  missingCats = [];
-  resetScanState();
-
+function loadFiles(fileObjs){
+  allFiles = fileObjs;
+  if(!allFiles.length) return;
   document.getElementById('btnScan').disabled = false;
-  document.getElementById('dz-title').textContent = `โหลดแล้ว ${allFiles.length} ไฟล์`;
-  document.getElementById('dz-sub').textContent =
-    allFiles.map(f => f.name).slice(0, 3).join(', ') +
-    (allFiles.length > 3 ? ` และอีก ${allFiles.length - 3} ไฟล์` : '');
-
-  buildPreviewBrowser();
+  const dz = document.getElementById('dropzone');
+  const loaded = document.getElementById('dz-loaded');
+  loaded.style.display = 'block';
+  loaded.textContent = `✅ โหลดแล้ว ${allFiles.length} ไฟล์`;
+  dz.querySelector('h3').textContent = allFiles[0]?.path?.split('/')[0] || 'Folder';
+  dz.querySelector('p').textContent = `${allFiles.length} ไฟล์ · ลึกสุด ${getMaxDepth()} ชั้น`;
+  buildTree();
+  buildBrowser();
+  updateTreeBadge();
 }
 
-function resetScanState() {
-  const pill = document.getElementById('status-pill');
-  pill.className = 'status-pill pill-idle';
-  pill.textContent = 'รอสแกน';
-
-  const badge = document.getElementById('badge-results');
-  badge.style.display = 'none';
-
-  ['s-total','s-ok','s-warn','s-miss'].forEach(id => {
-    document.getElementById(id).textContent = '0';
-  });
-
-  document.getElementById('resultBody').innerHTML = '';
+function getMaxDepth(){
+  let max=0;
+  allFiles.forEach(({path})=>{ const d=(path.match(/\//g)||[]).length; if(d>max) max=d; });
+  return max;
 }
 
-// ═══════════════════════════════════════════════════
-// EXT HELPER — safe for filenames without extension
-// ═══════════════════════════════════════════════════
-function getExt(filename) {
-  const parts = filename.split('.');
-  if (parts.length < 2) return '';
-  return '.' + parts.pop().toLowerCase();
-}
+// ═══════════════════════ SCAN ═══════════════════════
+function runScan(){
+  if(!allFiles.length) return;
+  const jobName = document.getElementById('jobName').value.trim() || 'Untitled Job';
+  const clientName = document.getElementById('clientName').value.trim() || '—';
+  const deadline = document.getElementById('deadline').value;
+  const priority = document.getElementById('priority').value;
+  const activeCats = cats.filter(c=>c.active);
+  const minKB = (settings.minKB||1)*1024;
+  const maxBytes = (settings.maxMB||0)*1024*1024;
 
-// ═══════════════════════════════════════════════════
-// SCAN
-// ═══════════════════════════════════════════════════
-function runScan() {
-  if (!allFiles.length) return;
-  const results = [];
-  const activeCats = CATEGORIES.filter(c => activeChecks.has(c.id));
-
-  allFiles.forEach(f => {
-    const ext = getExt(f.name);
-    const cat = ext ? (activeCats.find(c => c.exts.includes(ext)) || null) : null;
-    const issues = [];
-
-    if (f.size === 0) {
-      issues.push({ type: 'err', msg: 'ไฟล์ว่างเปล่า (0 bytes)' });
-    } else if (cat && f.size < cat.minSize) {
-      issues.push({ type: 'warn', msg: `ไฟล์เล็กกว่าปกติ (${fmtSize(f.size)})` });
-    }
-
-    if (!cat) {
-      issues.push({ type: 'warn', msg: ext ? 'ไม่ตรงหมวดที่กำหนด' : 'ไม่มีนามสกุลไฟล์' });
-    }
-
-    const status = issues.some(i => i.type === 'err') ? 'err'
-                 : issues.length ? 'warn' : 'ok';
-    results.push({ file: f, ext, cat, issues, status });
-  });
-
-  // Find missing categories
-  const missing = activeCats.filter(c => !results.some(r => r.cat && r.cat.id === c.id));
-
-  scanResults = results;
-  missingCats = missing;
-
-  renderResults(results, missing);
-  updateSummary(results, missing);
-  showPage('results');
-
-  const hasMiss = missing.length > 0;
-  const hasErr  = results.some(r => r.status === 'err');
-  const hasWarn = results.some(r => r.status === 'warn');
-  const pill = document.getElementById('status-pill');
-
-  if (hasMiss || hasErr) {
-    pill.className = 'status-pill pill-fail';
-    pill.textContent = 'ไม่พร้อม';
-  } else if (hasWarn) {
-    pill.className = 'status-pill pill-warn';
-    pill.textContent = 'มีข้อสังเกต';
-  } else {
-    pill.className = 'status-pill pill-ready';
-    pill.textContent = 'พร้อมทำงาน ✓';
-  }
-
-  const b = document.getElementById('badge-results');
-  b.style.display = '';
-  if (hasMiss || hasErr) {
-    b.className = 'nav-badge';
-    b.textContent = '!';
-  } else {
-    b.className = 'nav-badge ok';
-    b.textContent = '✓';
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// FILTER
-// ═══════════════════════════════════════════════════
-function setupFilterButtons() {
-  document.getElementById('resultsToolbar').addEventListener('click', e => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    currentFilter = btn.dataset.filter;
-
-    document.querySelectorAll('.filter-btn').forEach(b => {
-      b.classList.remove('active', 'active-warn', 'active-err');
+  setProgress(10);
+  setTimeout(()=>{
+    const results = allFiles.map(({file,path})=>{
+      const ext = '.'+file.name.split('.').pop().toLowerCase();
+      const cat = activeCats.find(c=>c.exts.includes(ext))||null;
+      const issues = [];
+      if(file.size===0) issues.push({type:'err',msg:'ไฟล์ว่างเปล่า (0 bytes)'});
+      else if(file.size < minKB) issues.push({type:'warn',msg:`ไฟล์เล็ก (${fmtSize(file.size)})`});
+      else if(cat && file.size < cat.minKB*1024) issues.push({type:'warn',msg:`เล็กกว่าปกติ (${fmtSize(file.size)})`});
+      if(maxBytes>0 && file.size>maxBytes) issues.push({type:'warn',msg:`ไฟล์ใหญ่มาก (${fmtSize(file.size)})`});
+      if(!cat) issues.push({type:'warn',msg:'ไม่ตรงหมวดที่กำหนด'});
+      return {file,path,ext,cat,issues,status:issues.some(i=>i.type==='err')?'err':issues.length?'warn':'ok'};
     });
 
-    if (currentFilter === 'warn') btn.classList.add('active-warn');
-    else if (currentFilter === 'err') btn.classList.add('active-err');
-    else btn.classList.add('active');
+    const missingCats = activeCats.filter(c=>!results.some(r=>r.cat?.id===c.id));
+    setProgress(70);
 
-    applyFilter();
-  });
+    lastScan = {jobName,clientName,deadline,priority,results,missingCats,
+      ts:Date.now(),totalFiles:results.length,maxDepth:getMaxDepth()};
+    saveToHistory(lastScan);
+    setProgress(90);
+    renderResults(lastScan);
+    updateSummary(lastScan);
+    setProgress(100);
+    showPage('results');
+  },50);
 }
 
-function applyFilter() {
-  document.querySelectorAll('.cat-wrap[data-filter-wrap]').forEach(wrap => {
-    const rows = wrap.querySelectorAll('tr[data-status]');
-    let visible = 0;
-    rows.forEach(row => {
-      const show = currentFilter === 'all' || row.dataset.status === currentFilter;
-      row.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-    // Hide entire category block if no rows match
-    wrap.style.display = visible === 0 && currentFilter !== 'all' ? 'none' : '';
-  });
-
-  // Missing block: only show on 'all' or 'err'
-  const missingWrap = document.querySelector('.cat-wrap[data-missing-block]');
-  if (missingWrap) {
-    missingWrap.style.display = (currentFilter === 'all' || currentFilter === 'err') ? '' : 'none';
-  }
+function setProgress(v){
+  const w = document.getElementById('progWrap');
+  const b = document.getElementById('progBar');
+  w.classList.add('show');
+  b.style.width=v+'%';
+  if(v>=100) setTimeout(()=>w.classList.remove('show'),500);
 }
 
-// ═══════════════════════════════════════════════════
-// SUMMARY
-// ═══════════════════════════════════════════════════
-function updateSummary(results, missing) {
+function updateSummary({results,missingCats,maxDepth}){
   document.getElementById('s-total').textContent = results.length;
-  document.getElementById('s-ok').textContent    = results.filter(r => r.status === 'ok').length;
-  document.getElementById('s-warn').textContent  = results.filter(r => r.status === 'warn').length;
-  document.getElementById('s-miss').textContent  = missing.length;
+  document.getElementById('s-ok').textContent = results.filter(r=>r.status==='ok').length;
+  document.getElementById('s-warn').textContent = results.filter(r=>r.status==='warn').length;
+  document.getElementById('s-miss').textContent = missingCats.length;
+  document.getElementById('s-depth').textContent = maxDepth;
+
+  const hasMiss = missingCats.length>0;
+  const hasErr = results.some(r=>r.status==='err');
+  const hasWarn = results.some(r=>r.status==='warn');
+  const pill = document.getElementById('status-pill');
+  const banner = document.getElementById('resultBanner');
+  banner.style.display='flex';
+  if(hasMiss||hasErr){
+    pill.className='status-pill sp-fail';pill.textContent='ไม่พร้อม ✗';
+    banner.className='result-banner rb-fail';banner.innerHTML='❌ &nbsp;ไฟล์ยังไม่ครบ / พบปัญหา — ติดต่อลูกค้าเพื่อส่งไฟล์เพิ่ม';
+    document.getElementById('nb-results').style.display='';document.getElementById('nb-results').textContent='!';document.getElementById('nb-results').className='nav-badge nb-err';
+  } else if(hasWarn){
+    pill.className='status-pill sp-warn';pill.textContent='มีข้อสังเกต';
+    banner.className='result-banner rb-warn';banner.innerHTML='⚠️ &nbsp;ไฟล์ครบ แต่มีข้อสังเกตบางรายการ — ตรวจสอบก่อนเริ่มงาน';
+    document.getElementById('nb-results').style.display='';document.getElementById('nb-results').textContent='⚠';document.getElementById('nb-results').className='nav-badge nb-warn';
+  } else {
+    pill.className='status-pill sp-ready';pill.textContent='พร้อมทำงาน ✓';
+    banner.className='result-banner rb-ok';banner.innerHTML='✅ &nbsp;ไฟล์ครบถ้วน พร้อมเริ่มงานได้เลย!';
+    document.getElementById('nb-results').style.display='';document.getElementById('nb-results').textContent='✓';document.getElementById('nb-results').className='nav-badge nb-ok';
+  }
 }
 
-// ═══════════════════════════════════════════════════
-// RENDER RESULTS
-// ═══════════════════════════════════════════════════
-function renderResults(results, missing) {
-  const body = document.getElementById('resultBody');
+function renderResults({jobName,clientName,deadline,priority,results,missingCats}){
+  document.getElementById('resultJobInfo').innerHTML =
+    `<span style="font-family:var(--font-mono);font-weight:700;color:var(--txt)">${jobName}</span> &nbsp;·&nbsp; ${clientName} &nbsp;·&nbsp; Deadline: ${deadline||'—'} &nbsp;·&nbsp; <span style="text-transform:capitalize">${priority}</span>`;
+
+  const activeCats = cats.filter(c=>c.active);
   let html = '';
 
-  // Missing categories block
-  if (missing.length) {
-    html += `<div class="cat-wrap" data-missing-block>
-      <div class="cat-hdr" onclick="toggleCategorySection(this)">
-        <span class="cat-icon">❌</span>
-        <span class="cat-label">หมวดที่หายไป</span>
-        <span class="cat-badge cb-miss" style="margin-left:auto">${missing.length} หมวด</span>
-        <span class="cat-caret">▾</span>
-      </div>
-      <div class="cat-body">
-        ${missing.map(c => `
-          <div class="missing-row">
-            <span>${c.icon}</span>
-            <span style="font-family:'Syne',sans-serif;font-size:11px;font-weight:600">${c.name}</span>
-            <span class="missing-exts">${c.exts.join(' ')}</span>
-          </div>`).join('')}
-      </div>
-    </div>`;
+  if(missingCats.length){
+    html += catBlock('❌','หมวดที่หายไป','',`<span style="color:var(--red)">${missingCats.length} หมวด</span>`,
+      missingCats.map(c=>`<div class="miss-row"><span>${c.icon}</span>
+        <span style="font-family:var(--font-mono);font-size:10.5px;font-weight:700">${c.name}</span>
+        <span style="margin-left:auto;font-size:9.5px;font-family:var(--font-mono);color:var(--muted)">${c.exts.join(' ')}</span>
+      </div>`).join(''));
   }
 
-  // Group by category
-  const activeCats = CATEGORIES.filter(c => activeChecks.has(c.id));
   const grouped = {};
-  activeCats.forEach(c => { grouped[c.id] = { cat: c, files: [] }; });
-  grouped['_other'] = { cat: { id: '_other', name: 'ไฟล์อื่นๆ', icon: '📁' }, files: [] };
-
-  results.forEach(r => {
-    const key = r.cat ? r.cat.id : '_other';
-    if (!grouped[key]) grouped[key] = { cat: r.cat || { id: '_other', name: 'ไฟล์อื่นๆ', icon: '📁' }, files: [] };
+  activeCats.forEach(c=>{ grouped[c.id]={cat:c,files:[]}; });
+  grouped['_other']={cat:{id:'_other',name:'ไฟล์อื่นๆ',icon:'📁'},files:[]};
+  results.forEach(r=>{
+    const key = r.cat?.id||'_other';
+    if(!grouped[key]) grouped[key]={cat:r.cat||{id:'_other',name:'ไฟล์อื่นๆ',icon:'📁'},files:[]};
     grouped[key].files.push(r);
   });
 
-  Object.values(grouped).forEach(({ cat, files }) => {
-    if (!files.length) return;
-    const hasErr  = files.some(r => r.status === 'err');
-    const hasWarn = files.some(r => r.status === 'warn');
-    const statClass = hasErr ? 'cb-miss' : hasWarn ? 'cb-warn' : 'cb-ok';
-    const statText  = hasErr  ? `${files.filter(r => r.status === 'err').length} Error`
-                    : hasWarn ? `${files.filter(r => r.status === 'warn').length} Warning`
-                    : `${files.length} ✓`;
+  Object.values(grouped).forEach(({cat,files})=>{
+    if(!files.length) return;
+    const nErr = files.filter(r=>r.status==='err').length;
+    const nWarn = files.filter(r=>r.status==='warn').length;
+    const statHtml = nErr?`<span class="nav-badge nb-err">${nErr} Error</span>`:nWarn?`<span class="nav-badge nb-warn">${nWarn} Warn</span>`:`<span class="nav-badge nb-ok">${files.length} ✓</span>`;
+    const rows = files.map(r=>{
+      const extCls = 'ext-badge ex-'+r.ext.replace('.','');
+      const prevBtn = canPreview(r.file)?`<button class="btn-prev" onclick="openPreview(${allFiles.findIndex(f=>f.file===r.file)})">👁 ดู</button>`:`<span style="font-size:9.5px;color:var(--muted2)">—</span>`;
+      const issueText = r.issues.length?r.issues.map(i=>i.msg).join(', '):'ปกติ';
+      const dCls='dot-'+r.status, tCls='text-'+r.status;
+      const depth = (r.path.match(/\//g)||[]).length;
+      const displayPath = r.path.split('/').slice(0,-1).join('/') || '/';
+      return `<tr>
+        <td><div class="fname" title="${r.file.name}">${r.file.name}</div></td>
+        <td class="fpath-cell" title="${r.path}">${displayPath}</td>
+        <td><span class="${extCls}">${r.ext.replace('.','').toUpperCase()}</span></td>
+        <td class="fsize-cell">${fmtSize(r.file.size)}</td>
+        <td><div class="fstatus"><div class="dot ${dCls}"></div><span class="${tCls}">${issueText}</span></div></td>
+        <td>${prevBtn}</td>
+      </tr>`;
+    }).join('');
+    html += catBlock(cat.icon, cat.name, `<span style="color:var(--muted);font-size:10px">(${files.length})</span>`, statHtml,
+      `<table class="ftable"><thead><tr><th>ชื่อไฟล์</th><th>Path</th><th>นามสกุล</th><th>ขนาด</th><th>สถานะ</th><th>Preview</th></tr></thead><tbody>${rows}</tbody></table>`);
+  });
+  document.getElementById('resultBody').innerHTML = html||'<div class="empty"><span>📭</span>ยังไม่มีข้อมูล</div>';
+}
 
-    html += `<div class="cat-wrap" data-filter-wrap>
-      <div class="cat-hdr" onclick="toggleCategorySection(this)">
-        <span class="cat-icon">${cat.icon || '📁'}</span>
-        <span class="cat-label">${cat.name}</span>
-        <span class="cat-badge ${statClass}" style="margin-left:auto">${statText}</span>
-        <span class="cat-caret">▾</span>
+function catBlock(icon,label,cnt,stat,bodyHtml){
+  return `<div class="cat-wrap">
+    <div class="cat-hdr" onclick="this.classList.toggle('closed');this.querySelector('.cat-caret').textContent=this.classList.contains('closed')?'▾':'▴';this.nextElementSibling.classList.toggle('hidden')">
+      <span class="cat-ic">${icon}</span>
+      <span class="cat-lbl">${label}</span>${cnt?`<span class="cat-cnt">${cnt}</span>`:''}
+      <span style="margin-left:auto">${stat}</span>
+      <span class="cat-caret" style="margin-left:6px">▴</span>
+    </div>
+    <div class="cat-body">${bodyHtml}</div>
+  </div>`;
+}
+
+// ═══════════════════════ TREE ═══════════════════════
+function buildTree(){
+  if(!allFiles.length){document.getElementById('treeBody').innerHTML='<div class="empty"><span>🌲</span>ยังไม่มีข้อมูล</div>';return;}
+  const tree = {};
+  allFiles.forEach(({file,path})=>{
+    const parts = path.split('/');
+    let node = tree;
+    parts.forEach((p,i)=>{
+      if(!node[p]) node[p] = {_files:[],_dirs:{}};
+      if(i===parts.length-1) node[p]._isFile = true, node[p]._fileObj = {file,path};
+      else node = node[p]._dirs||(node[p]._dirs={});
+    });
+  });
+  document.getElementById('treeBody').innerHTML = renderTree(tree, 0);
+}
+
+function renderTree(node, depth){
+  let html = '';
+  const indent = '&nbsp;&nbsp;&nbsp;'.repeat(depth);
+  Object.keys(node).sort().forEach(key=>{
+    if(key.startsWith('_')) return;
+    const n = node[key];
+    if(n._isFile){
+      const fo = n._fileObj;
+      const ext = fo.file.name.split('.').pop().toLowerCase();
+      const prevable = canPreview(fo.file);
+      const idx = allFiles.findIndex(f=>f.file===fo.file);
+      html += `<div class="tree-node" ${prevable?`onclick="openPreview(${idx})"`:''}
+        title="${fo.path}" style="${prevable?'cursor:pointer':''}">
+        <span class="tree-indent">${indent}├─</span>
+        <span class="tree-file" style="${prevable?'color:var(--teal)':''}">
+          ${fileIcon(ext)} ${fo.file.name}
+        </span>
+        <span class="tree-size">${fmtSize(fo.file.size)}</span>
+      </div>`;
+    } else {
+      const dirId = 'dir_'+Math.random().toString(36).slice(2);
+      const fileCount = countFiles(n);
+      html += `<div class="tree-node" onclick="toggleDir('${dirId}')">
+        <span class="tree-indent">${indent}📁</span>
+        <span class="tree-dir"> ${key}/</span>
+        <span class="tree-size" style="color:var(--muted2)">${fileCount}f</span>
       </div>
-      <div class="cat-body">
-        <table class="ftable">
-          <thead><tr>
-            <th style="width:36%">ชื่อไฟล์</th>
-            <th>นามสกุล</th>
-            <th>ขนาด</th>
-            <th>สถานะ</th>
-            <th>Preview</th>
-          </tr></thead>
-          <tbody>
-            ${files.map(r => {
-              const prevBtn = canPreview(r.file)
-                ? `<button class="btn-prev" onclick="openPreview(${allFiles.indexOf(r.file)})" aria-label="ดู preview ${r.file.name}">👁 ดู</button>`
-                : `<span class="no-prev">—</span>`;
-              const issueText = r.issues.length ? r.issues.map(i => i.msg).join(', ') : 'ปกติ';
-              const dotCls = r.status === 'ok' ? 'dot-ok' : r.status === 'warn' ? 'dot-warn' : 'dot-err';
-              const txtCls = r.status === 'ok' ? 'text-ok' : r.status === 'warn' ? 'text-warn' : 'text-err';
-              const extKey = r.ext ? r.ext.replace('.', '').toLowerCase() : 'other';
-              return `<tr data-status="${r.status}">
-                <td><div class="fname" title="${r.file.name}">${r.file.name}</div></td>
-                <td><span class="fext-badge ext-${extKey}">${r.ext ? r.ext.replace('.','').toUpperCase() : '—'}</span></td>
-                <td class="fsize">${fmtSize(r.file.size)}</td>
-                <td><div class="fstatus"><div class="dot ${dotCls}"></div><span class="${txtCls}">${issueText}</span></div></td>
-                <td>${prevBtn}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
+      <div id="${dirId}">${renderTree(n._dirs||n, depth+1)}</div>`;
+    }
+  });
+  return html;
+}
+
+function countFiles(node){
+  let n=0;
+  Object.keys(node).forEach(k=>{ if(k.startsWith('_')) return; n += node[k]._isFile?1:countFiles(node[k]._dirs||node[k]); });
+  return n;
+}
+function toggleDir(id){ const el=document.getElementById(id); if(el) el.style.display=el.style.display==='none'?'':'none'; }
+function expandAll(){ document.querySelectorAll('[id^="dir_"]').forEach(el=>el.style.display=''); }
+function collapseAll(){ document.querySelectorAll('[id^="dir_"]').forEach(el=>el.style.display='none'); }
+function updateTreeBadge(){ const b=document.getElementById('nb-tree'); b.style.display='';b.textContent=allFiles.length; }
+function fileIcon(ext){ const m={blend:'🫙',fbx:'📦',obj:'🔷',psd:'🎨',ai:'✏️',pdf:'📄',mp4:'🎬',mov:'🎬',exr:'🌅',hdr:'🌅',aep:'🎞',png:'🖼',jpg:'🖼',jpeg:'🖼',webp:'🖼',tga:'🖼',mp3:'🎵',wav:'🎵'}; return m[ext]||'📄'; }
+
+// ═══════════════════════ BROWSER ═══════════════════════
+function buildBrowser(){
+  const prev = allFiles.filter(({file})=>canPreview(file));
+  const b = document.getElementById('nb-browser');
+  b.style.display=''; b.textContent=prev.length;
+
+  // Filter bar
+  const exts = [...new Set(allFiles.map(({file})=>'.'+file.name.split('.').pop().toLowerCase()))].sort();
+  document.getElementById('filterBar').innerHTML = 
+    `<button class="btn-sm btn-primary" style="padding:4px 12px;font-size:10px;flex:none" onclick="filterBrowser('')">All (${allFiles.length})</button>`+
+    exts.map(e=>`<button class="btn-sm" style="padding:4px 10px;font-size:10px;flex:none" onclick="filterBrowser('${e}')">${e.replace('.','').toUpperCase()} (${allFiles.filter(f=>f.file.name.endsWith(e)).length})</button>`).join('');
+
+  renderBrowserGrid('');
+  // load image thumbs
+  setTimeout(()=>{
+    prev.forEach(({file},_)=>{
+      const ext = file.name.split('.').pop().toLowerCase();
+      if(['png','jpg','jpeg','webp','gif'].includes(ext)){
+        const idx = allFiles.findIndex(f=>f.file===file);
+        const url = URL.createObjectURL(file);
+        const el = document.getElementById('thumb-img-'+idx);
+        if(el) el.innerHTML=`<img src="${url}" style="width:100%;height:85px;object-fit:cover" onload="URL.revokeObjectURL(this.src)">`;
+      }
+    });
+  },100);
+}
+
+function filterBrowser(ext){
+  renderBrowserGrid(ext);
+}
+function renderBrowserGrid(ext){
+  const filtered = ext ? allFiles.filter(({file})=>file.name.endsWith(ext)) : allFiles;
+  const g = document.getElementById('browserGrid');
+  if(!filtered.length){g.innerHTML='<div class="empty"><span>🔍</span>ไม่พบไฟล์</div>';return;}
+  g.innerHTML = filtered.map(({file,path})=>{
+    const idx = allFiles.findIndex(f=>f.file===file);
+    const prev = canPreview(file);
+    const extL = file.name.split('.').pop().toLowerCase();
+    const icons = {blend:'🫙',fbx:'📦',obj:'🔷',psd:'🎨',ai:'✏️',pdf:'📄',mp4:'🎬',mov:'🎬',exr:'🌅',aep:'🎞'};
+    return `<div class="prev-thumb" onclick="${prev?`openPreview(${idx})`:''}">
+      <div class="thumb-img" id="thumb-img-${idx}">
+        <span style="font-size:26px">${icons[extL]||'📄'}</span>
       </div>
-    </div>`;
-  });
-
-  body.innerHTML = html || '<div class="empty-note"><span class="ei">📭</span>ยังไม่มีข้อมูล</div>';
-  currentFilter = 'all';
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active','active-warn','active-err'));
-  document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
-}
-
-function toggleCategorySection(hdr) {
-  hdr.classList.toggle('closed');
-  const body = hdr.nextElementSibling;
-  if (body) body.classList.toggle('hidden');
-}
-
-// ═══════════════════════════════════════════════════
-// EXPORT CSV
-// ═══════════════════════════════════════════════════
-function exportCSV() {
-  if (!scanResults.length) return;
-  const rows = [['ชื่อไฟล์', 'นามสกุล', 'หมวด', 'ขนาด (bytes)', 'สถานะ', 'หมายเหตุ']];
-
-  scanResults.forEach(r => {
-    rows.push([
-      r.file.name,
-      r.ext || '—',
-      r.cat ? r.cat.name : 'ไม่ตรงหมวด',
-      r.file.size,
-      r.status === 'ok' ? 'ผ่าน' : r.status === 'warn' ? 'เตือน' : 'Error',
-      r.issues.map(i => i.msg).join('; ') || 'ปกติ'
-    ]);
-  });
-
-  missingCats.forEach(c => {
-    rows.push(['—', '—', c.name, '—', 'หายไป', 'ไม่พบไฟล์ในหมวดนี้']);
-  });
-
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `asset-report-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ═══════════════════════════════════════════════════
-// PREVIEW BROWSER
-// ═══════════════════════════════════════════════════
-function buildPreviewBrowser() {
-  const wrap = document.getElementById('previewBrowser');
-  if (!allFiles.length) { wrap.innerHTML = '<div class="empty-note"><span class="ei">📂</span>ยังไม่มีไฟล์</div>'; return; }
-
-  const previewable = allFiles.filter(f => canPreview(f));
-  if (!previewable.length) { wrap.innerHTML = '<div class="empty-note"><span class="ei">🔍</span>ไม่พบไฟล์ที่ preview ได้</div>'; return; }
-
-  const gridItems = previewable.map(f => {
-    const idx = allFiles.indexOf(f);
-    const ext = getExt(f.name).replace('.','');
-    return `<div class="thumb-card" onclick="openPreview(${idx})" tabindex="0"
-               onkeydown="if(event.key==='Enter')openPreview(${idx})"
-               aria-label="ดู preview ${f.name}">
-      <div class="thumb-img" id="thumb-${idx}">${thumbHTML(f)}</div>
       <div class="thumb-info">
-        <div class="thumb-name">${f.name}</div>
-        <div class="thumb-size">${fmtSize(f.size)}</div>
+        <div class="thumb-name" title="${file.name}">${file.name}</div>
+        <div class="thumb-size">${fmtSize(file.size)}</div>
       </div>
     </div>`;
   }).join('');
-
-  wrap.innerHTML = `
-    <span class="section-lbl">
-      ${previewable.length} ไฟล์ที่ดูได้
-    </span>
-    <div class="thumb-grid">${gridItems}</div>`;
-
-  // Load image thumbnails asynchronously
-  previewable.forEach(f => {
-    const idx = allFiles.indexOf(f);
-    const ext = getExt(f.name).replace('.','');
-    if (['png','jpg','jpeg','webp','gif'].includes(ext)) {
-      const url = createObjectURL(f);
-      const t = document.getElementById('thumb-' + idx);
-      if (t) {
-        const img = document.createElement('img');
-        img.style.cssText = 'width:100%;height:100px;object-fit:cover';
-        img.src = url;
-        img.onload = () => { t.innerHTML = ''; t.appendChild(img); };
-        img.onerror = () => revokeObjectURL(url);
-      }
-    }
-  });
 }
 
-function thumbHTML(f) {
-  const ext = getExt(f.name).replace('.','');
-  const icons = { blend:'🫙', fbx:'📦', obj:'🔷', psd:'🎨', ai:'✏️', pdf:'📄', mp4:'🎬', mov:'🎬', exr:'🌅', aep:'🎞' };
-  return `<span style="font-size:32px">${icons[ext] || '📄'}</span>`;
+// ═══════════════════════ PREVIEW MODAL ═══════════════════════
+function canPreview(file){
+  const e = file.name.split('.').pop().toLowerCase();
+  return ['png','jpg','jpeg','webp','gif','mp4','mov','pdf','obj','psd','ai','exr','blend','fbx','aep','hdr','tga'].includes(e);
 }
 
-function canPreview(f) {
-  const ext = getExt(f.name).replace('.','');
-  return ['png','jpg','jpeg','webp','gif','mp4','mov','pdf','obj','psd','ai','exr','blend','fbx','aep'].includes(ext);
-}
-
-// ═══════════════════════════════════════════════════
-// PREVIEW MODAL
-// ═══════════════════════════════════════════════════
-let currentModalURLs = [];
-
-function openPreview(idx) {
-  const f = allFiles[idx];
-  if (!f) return;
-  const ext = getExt(f.name).replace('.','').toLowerCase();
-
-  document.getElementById('modalTitle').textContent = f.name;
-  document.getElementById('modalSub').textContent   = `${ext.toUpperCase()} · ${fmtSize(f.size)}`;
-  const body = document.getElementById('modalBody');
-  body.innerHTML = '<div class="loading-spin"></div>';
+function openPreview(idx){
+  const {file,path} = allFiles[idx];
+  const ext = file.name.split('.').pop().toLowerCase();
+  document.getElementById('modal-title').textContent = file.name;
+  document.getElementById('modal-sub').textContent = `${ext.toUpperCase()} · ${fmtSize(file.size)} · ${path}`;
+  document.getElementById('modal-body').innerHTML = '<div class="spin"></div>';
   document.getElementById('modalBg').classList.add('open');
-
-  // Revoke previous modal URLs
-  currentModalURLs.forEach(u => revokeObjectURL(u));
-  currentModalURLs = [];
-
-  setTimeout(() => {
-    if (['png','jpg','jpeg','webp','gif'].includes(ext)) {
-      const url = createObjectURL(f);
-      currentModalURLs.push(url);
-      const img = document.createElement('img');
-      img.className = 'prev-img';
-      img.src = url;
-      img.alt = f.name;
-      img.onload  = () => revokeObjectURL(url); // revoke after render
-      img.onerror = () => revokeObjectURL(url);
-      body.innerHTML = '';
-      body.appendChild(img);
-    }
-    else if (['mp4','mov','avi'].includes(ext)) {
-      const url = createObjectURL(f);
-      currentModalURLs.push(url);
-      const vid = document.createElement('video');
-      vid.controls = true;
-      vid.style.cssText = 'max-width:100%;max-height:60vh;border-radius:12px;background:#000;box-shadow: 0 8px 32px rgba(0,0,0,0.5);';
-      vid.src = url;
-      body.innerHTML = '';
-      body.appendChild(vid);
-      // revoke when modal closes (handled in closeModal)
-    }
-    else if (ext === 'pdf') {
-      const url = createObjectURL(f);
-      currentModalURLs.push(url);
-      body.innerHTML = `<iframe src="${url}" style="width:100%;height:60vh;border:none;border-radius:12px" title="${f.name}"></iframe>`;
-    }
-    else if (ext === 'obj') {
-      renderOBJ(f, body);
-    }
-    else if (['psd','ai'].includes(ext)) {
-      renderPSDInfo(f, ext, body);
-    }
-    else if (ext === 'exr') {
-      renderEXRInfo(f, body);
-    }
-    else if (['blend','fbx','aep'].includes(ext)) {
-      renderAppInfo(f, ext, body);
-    }
-    else {
-      body.innerHTML = `<div class="prev-unsupported">
-        <span class="big-icon">📄</span>
-        <h3>${f.name}</h3>
-        <p>ไม่รองรับ preview สำหรับ .${ext}<br>แต่ไฟล์พร้อมใช้งาน</p>
-        <div class="prev-info-grid" style="margin-top:1.5rem">
-          <div class="prev-info-card"><div class="prev-info-label">ขนาด</div><div class="prev-info-val">${fmtSize(f.size)}</div></div>
-          <div class="prev-info-card"><div class="prev-info-label">นามสกุล</div><div class="prev-info-val">.${ext.toUpperCase()}</div></div>
-        </div>
-      </div>`;
-    }
-  }, 50);
+  setTimeout(()=>renderPreview(file, ext), 60);
 }
-
-function closeModal() {
+function closeModal(){
   document.getElementById('modalBg').classList.remove('open');
-  // Stop video playback before clearing
-  const vid = document.querySelector('#modalBody video');
-  if (vid) { vid.pause(); vid.src = ''; }
-  document.getElementById('modalBody').innerHTML = '';
-  // Revoke any lingering URLs
-  currentModalURLs.forEach(u => revokeObjectURL(u));
-  currentModalURLs = [];
+  document.getElementById('modal-body').innerHTML='';
 }
 
-document.getElementById('modalBg').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+function renderPreview(file, ext){
+  const body = document.getElementById('modal-body');
+  if(['png','jpg','jpeg','webp','gif','tga'].includes(ext)){
+    const url = URL.createObjectURL(file);
+    body.innerHTML = `<img class="prev-img" src="${url}" onload="URL.revokeObjectURL(this.src)">`;
+  } else if(['mp4','mov','avi'].includes(ext)){
+    const url = URL.createObjectURL(file);
+    body.innerHTML = `<video controls style="max-width:100%;max-height:66vh;border-radius:8px" src="${url}"></video>`;
+  } else if(ext==='pdf'){
+    const url = URL.createObjectURL(file);
+    body.innerHTML = `<iframe src="${url}" style="width:100%;height:66vh;border:none;border-radius:8px"></iframe>`;
+  } else if(ext==='obj'){
+    renderOBJViewer(file, body);
+  } else if(['psd','ai'].includes(ext)){
+    renderPSDInfo(file, ext, body);
+  } else if(['exr','hdr'].includes(ext)){
+    renderHDRInfo(file, ext, body);
+  } else {
+    renderGenericInfo(file, ext, body);
+  }
+}
 
-// ─── OBJ Viewer (Three.js) ───
-function renderOBJ(file, container) {
-  container.innerHTML = `<div class="prev-3d-wrap" id="threeWrap">
-    <div style="position:absolute;top:14px;left:14px;font-size:11px;font-family:'Syne',sans-serif;color:rgba(0,240,202,.6);z-index:2;pointer-events:none;font-weight:500;">鼠标 ลากเพื่อหมุน · Scroll เพื่อ Zoom</div>
+function renderOBJViewer(file, container){
+  container.innerHTML = `<div class="prev-3d" id="threeWrap">
+    <div class="prev-3d-hint">🖱 ลากเพื่อหมุน · Scroll Zoom · ขวาเพื่อ Pan</div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" id="obj-loading">
+      <div class="spin"></div>
+    </div>
   </div>`;
   const wrap = document.getElementById('threeWrap');
+  if(window.THREE){ startOBJ(file,wrap); return; }
+  const s = document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload=()=>startOBJ(file,wrap);
+  document.head.appendChild(s);
+}
 
-  const script3 = document.createElement('script');
-  script3.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-  script3.onload = () => {
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x04060a);
-    const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.01, 10000);
-    camera.position.set(0, 0, 3);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    wrap.appendChild(renderer.domElement);
+function startOBJ(file, wrap){
+  const W=wrap.clientWidth, H=wrap.clientHeight||480;
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x060a0e);
+  const camera=new THREE.PerspectiveCamera(45,W/H,0.001,100000);
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  wrap.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const dir = new THREE.DirectionalLight(0x00f0ca, 0.8);
-    dir.position.set(5, 5, 5); scene.add(dir);
-    const dir2 = new THREE.DirectionalLight(0x4da6ff, 0.4);
-    dir2.position.set(-5, -3, 2); scene.add(dir2);
-    scene.add(new THREE.GridHelper(4, 20, 0x222f46, 0x222f46));
+  scene.add(new THREE.AmbientLight(0xffffff,.5));
+  const d1=new THREE.DirectionalLight(0x00e5c0,.8); d1.position.set(5,5,5); scene.add(d1);
+  const d2=new THREE.DirectionalLight(0x3d9eff,.4); d2.position.set(-3,-2,3); scene.add(d2);
+  scene.add(new THREE.GridHelper(10,20,0x1e2d3d,0x1e2d3d));
 
-    const reader = new FileReader();
-    reader.onload = e => {
-      const text = e.target.result;
-      const vertices = [], faces = [];
-      text.split('\n').forEach(line => {
-        const p = line.trim().split(/\s+/);
-        if (p[0] === 'v') vertices.push(new THREE.Vector3(parseFloat(p[1]), parseFloat(p[2]), parseFloat(p[3])));
-        if (p[0] === 'f') {
-          const idx = p.slice(1).map(x => parseInt(x.split('/')[0]) - 1);
-          for (let i = 1; i < idx.length - 1; i++) faces.push(idx[0], idx[i], idx[i + 1]);
-        }
-      });
-
-      if (vertices.length) {
-        const geo = new THREE.BufferGeometry();
-        const pos = new Float32Array(vertices.length * 3);
-        vertices.forEach((v, i) => { pos[i * 3] = v.x; pos[i * 3 + 1] = v.y; pos[i * 3 + 2] = v.z; });
-        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        if (faces.length) geo.setIndex(faces);
-        geo.computeBoundingSphere();
-        geo.computeVertexNormals();
-
-        const mat  = new THREE.MeshStandardMaterial({ color: 0x00f0ca, wireframe: false, roughness: .4, metalness: .3 });
-        const mesh = new THREE.Mesh(geo, mat);
-        const s    = geo.boundingSphere;
-        const scale = 1.5 / s.radius;
-        mesh.scale.setScalar(scale);
-        mesh.position.set(-s.center.x * scale, -s.center.y * scale, -s.center.z * scale);
-        scene.add(mesh);
-
-        // FIX: wireframe overlay — clone mesh properly with position & scale
-        const wmat  = new THREE.MeshBasicMaterial({ color: 0x222f46, wireframe: true });
-        const wmesh = new THREE.Mesh(geo, wmat);
-        wmesh.scale.copy(mesh.scale);
-        wmesh.position.copy(mesh.position);
-        scene.add(wmesh);
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const verts=[],faces=[];
+    text.split('\n').forEach(line=>{
+      const p=line.trim().split(/\s+/);
+      if(p[0]==='v') verts.push(parseFloat(p[1]),parseFloat(p[2]),parseFloat(p[3]));
+      if(p[0]==='f'){
+        const idx=p.slice(1).map(x=>parseInt(x.split('/')[0])-1);
+        for(let i=1;i<idx.length-1;i++) faces.push(idx[0],idx[i],idx[i+1]);
       }
+    });
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(verts),3));
+    if(faces.length) geo.setIndex(faces);
+    geo.computeVertexNormals(); geo.computeBoundingSphere();
+    const bs=geo.boundingSphere;
+    const sc=2/bs.radius;
+    const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x00e5c0,roughness:.4,metalness:.3}));
+    const wm=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x1e2d3d,wireframe:true}));
+    [mesh,wm].forEach(m=>{m.scale.setScalar(sc);m.position.set(-bs.center.x*sc,-bs.center.y*sc,-bs.center.z*sc);scene.add(m);});
+    camera.position.set(0,0,4);
+    document.getElementById('obj-loading')?.remove();
 
-      let drag = false, px = 0, py = 0, rotX = 0, rotY = 0, zoom = 3;
-      renderer.domElement.addEventListener('mousedown', e => { drag = true; px = e.clientX; py = e.clientY; });
-      renderer.domElement.addEventListener('mousemove', e => {
-        if (!drag) return;
-        rotY += (e.clientX - px) * 0.008; rotX += (e.clientY - py) * 0.008;
-        px = e.clientX; py = e.clientY;
-      });
-      renderer.domElement.addEventListener('mouseup', () => drag = false);
-      renderer.domElement.addEventListener('mouseleave', () => drag = false);
-      renderer.domElement.addEventListener('wheel', e => {
-        zoom = Math.max(.5, Math.min(20, zoom + e.deltaY * .01));
-      });
-
-      (function animate() {
-        requestAnimationFrame(animate);
-        camera.position.x = zoom * Math.sin(rotY) * Math.cos(rotX);
-        camera.position.y = zoom * Math.sin(rotX);
-        camera.position.z = zoom * Math.cos(rotY) * Math.cos(rotX);
-        camera.lookAt(0, 0, 0);
-        renderer.render(scene, camera);
-      })();
-    };
-    reader.readAsText(file);
+    let drag=false,dragBtn=0,ox=0,oy=0,rotX=0,rotY=0,zoom=4;
+    renderer.domElement.addEventListener('mousedown',e=>{drag=true;dragBtn=e.button;ox=e.clientX;oy=e.clientY;});
+    window.addEventListener('mouseup',()=>drag=false);
+    renderer.domElement.addEventListener('mousemove',e=>{
+      if(!drag) return;
+      rotY+=(e.clientX-ox)*.008; rotX+=(e.clientY-oy)*.008; ox=e.clientX; oy=e.clientY;
+    });
+    renderer.domElement.addEventListener('wheel',e=>{zoom=Math.max(.5,Math.min(50,zoom+e.deltaY*.005));e.preventDefault();},{passive:false});
+    (function loop(){
+      requestAnimationFrame(loop);
+      camera.position.set(zoom*Math.sin(rotY)*Math.cos(rotX),zoom*Math.sin(rotX),zoom*Math.cos(rotY)*Math.cos(rotX));
+      camera.lookAt(0,0,0);
+      renderer.render(scene,camera);
+    })();
   };
-  document.head.appendChild(script3);
+  reader.readAsText(file);
 }
 
-// ─── PSD / AI Info ───
-function renderPSDInfo(file, ext, container) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const buf = new Uint8Array(e.target.result);
-    let w = 0, h = 0, channels = 0, depth = 0, colorMode = '';
-    if (ext === 'psd' && buf[0] === 0x38 && buf[1] === 0x42) {
-      channels  = (buf[12] << 8) | buf[13];
-      h         = (buf[14] << 24) | (buf[15] << 16) | (buf[16] << 8) | buf[17];
-      w         = (buf[18] << 24) | (buf[19] << 16) | (buf[20] << 8) | buf[21];
-      depth     = (buf[22] << 8) | buf[23];
-      const cm  = (buf[24] << 8) | buf[25];
-      colorMode = ['Bitmap','Grayscale','Indexed','RGB','CMYK','','','','Multichannel','Duotone','Lab'][cm] || 'Unknown';
+function renderPSDInfo(file, ext, body){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const buf=new Uint8Array(e.target.result);
+    let w=0,h=0,ch=0,depth=0,cm='';
+    if(ext==='psd'&&buf[0]===0x38&&buf[1]===0x42){
+      ch=(buf[12]<<8)|buf[13]; h=(buf[14]<<24)|(buf[15]<<16)|(buf[16]<<8)|buf[17];
+      w=(buf[18]<<24)|(buf[19]<<16)|(buf[20]<<8)|buf[21]; depth=(buf[22]<<8)|buf[23];
+      const cmi=(buf[24]<<8)|buf[25];
+      cm=['Bitmap','Grayscale','Indexed','RGB','CMYK','','','','Multichannel','Duotone','Lab'][cmi]||'Unknown';
     }
-    const lmod = new Date(file.lastModified);
-    container.innerHTML = `
-      <div style="width:100%;max-width:520px">
-        <div style="text-align:center;margin-bottom:2rem">
-          <span style="font-size:64px; display:block; margin-bottom:0.5rem;">${ext === 'psd' ? '🎨' : '✏️'}</span>
-          <h3 style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-top:.5rem">${file.name}</h3>
-          <p style="font-size:12px;color:var(--muted);margin-top:4px;font-weight:500;">${ext.toUpperCase()} · ${ext === 'psd' ? 'Adobe Photoshop' : 'Adobe Illustrator'}</p>
-        </div>
-        <div class="prev-info-grid">
-          ${w ? `<div class="prev-info-card"><div class="prev-info-label">ขนาด Canvas</div><div class="prev-info-val">${w} × ${h} px</div></div>` : ''}
-          ${channels ? `<div class="prev-info-card"><div class="prev-info-label">Channels</div><div class="prev-info-val">${channels} ch · ${depth}bit</div></div>` : ''}
-          ${colorMode ? `<div class="prev-info-card"><div class="prev-info-label">Color Mode</div><div class="prev-info-val">${colorMode}</div></div>` : ''}
-          <div class="prev-info-card"><div class="prev-info-label">ขนาดไฟล์</div><div class="prev-info-val">${fmtSize(file.size)}</div></div>
-          <div class="prev-info-card" style="grid-column:1/-1"><div class="prev-info-label">แก้ไขล่าสุด</div><div class="prev-info-val">${lmod.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div>
-        </div>
-        <div style="margin-top:1.5rem;padding:14px 16px;background:rgba(77, 166, 255, 0.06);border:1px solid rgba(77, 166, 255, 0.2);border-radius:10px;font-size:13px;color:rgba(77, 166, 255, 0.9);line-height:1.7">
-          <strong style="color:var(--blue)">ℹ️ หมายเหตุ:</strong> ไม่สามารถแสดง layer content ได้ในบราวเซอร์ — แต่ข้อมูลไฟล์ถูกต้อง พร้อมเปิดใน Photoshop / Illustrator
-        </div>
-      </div>`;
+    const lm=new Date(file.lastModified);
+    body.innerHTML=`<div class="prev-info">
+      <span class="prev-info-icon">${ext==='psd'?'🎨':'✏️'}</span>
+      <div class="prev-info-title">${file.name}</div>
+      <div class="prev-info-sub">${ext==='psd'?'Adobe Photoshop':'Adobe Illustrator'}</div>
+      <div class="info-grid">
+        ${w?`<div class="info-card"><div class="info-lbl">Canvas Size</div><div class="info-val">${w} × ${h} px</div></div>`:''}
+        ${ch?`<div class="info-card"><div class="info-lbl">Channels / Depth</div><div class="info-val">${ch}ch · ${depth}bit</div></div>`:''}
+        ${cm?`<div class="info-card"><div class="info-lbl">Color Mode</div><div class="info-val">${cm}</div></div>`:''}
+        <div class="info-card"><div class="info-lbl">File Size</div><div class="info-val">${fmtSize(file.size)}</div></div>
+        <div class="info-card" style="grid-column:1/-1"><div class="info-lbl">แก้ไขล่าสุด</div><div class="info-val">${lm.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div>
+      </div>
+      <div class="info-note note-blue" style="margin-top:.85rem">ℹ️ ต้องใช้ ${ext==='psd'?'Adobe Photoshop':'Adobe Illustrator'} เพื่อดู layer content — ไฟล์พร้อมใช้งาน</div>
+    </div>`;
   };
-  reader.readAsArrayBuffer(file.slice(0, 500));
+  reader.readAsArrayBuffer(file.slice(0,500));
 }
 
-// ─── EXR Info ───
-function renderEXRInfo(file, container) {
-  const lmod = new Date(file.lastModified);
-  container.innerHTML = `
-    <div style="width:100%;max-width:440px;text-align:center">
-      <span style="font-size:56px;display:block;margin-bottom:1rem">🌅</span>
-      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;">${file.name}</h3>
-      <p style="font-size:12px;color:var(--muted);margin:4px 0 1.5rem;font-weight:500;">OpenEXR HDR Image</p>
-      <div class="prev-info-grid">
-        <div class="prev-info-card"><div class="prev-info-label">ขนาดไฟล์</div><div class="prev-info-val">${fmtSize(file.size)}</div></div>
-        <div class="prev-info-card"><div class="prev-info-label">Format</div><div class="prev-info-val">EXR / HDR</div></div>
-        <div class="prev-info-card" style="grid-column:1/-1"><div class="prev-info-label">แก้ไขล่าสุด</div><div class="prev-info-val">${lmod.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div></div>
+function renderHDRInfo(file, ext, body){
+  const lm=new Date(file.lastModified);
+  body.innerHTML=`<div class="prev-info">
+    <span class="prev-info-icon">🌅</span>
+    <div class="prev-info-title">${file.name}</div>
+    <div class="prev-info-sub">OpenEXR / HDR Image</div>
+    <div class="info-grid">
+      <div class="info-card"><div class="info-lbl">File Size</div><div class="info-val">${fmtSize(file.size)}</div></div>
+      <div class="info-card"><div class="info-lbl">Format</div><div class="info-val">${ext.toUpperCase()}</div></div>
+      <div class="info-card" style="grid-column:1/-1"><div class="info-lbl">แก้ไขล่าสุด</div><div class="info-val">${lm.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}</div></div>
+    </div>
+    <div class="info-note note-teal">EXR/HDR ต้องการ Blender / DaVinci Resolve เพื่อดู HDR layers — ไฟล์พร้อมใช้งาน</div>
+  </div>`;
+}
+
+function renderGenericInfo(file, ext, body){
+  const appMap={blend:{name:'Blender',icon:'🫙',c:'var(--amber)'},fbx:{name:'Autodesk FBX',icon:'📦',c:'var(--purple)'},aep:{name:'After Effects',icon:'🎞',c:'var(--blue)'},c4d:{name:'Cinema 4D',icon:'🎯',c:'var(--teal)'},ma:{name:'Maya',icon:'🧊',c:'var(--blue)'},mb:{name:'Maya Binary',icon:'🧊',c:'var(--blue)'}};
+  const info=appMap[ext]||{name:'ไฟล์ทั่วไป',icon:'📄',c:'var(--muted)'};
+  const lm=new Date(file.lastModified);
+  body.innerHTML=`<div class="prev-info">
+    <span class="prev-info-icon">${info.icon}</span>
+    <div class="prev-info-title">${file.name}</div>
+    <div class="prev-info-sub" style="color:${info.c}">${info.name}</div>
+    <div class="info-grid" style="margin-top:.85rem">
+      <div class="info-card"><div class="info-lbl">File Size</div><div class="info-val">${fmtSize(file.size)}</div></div>
+      <div class="info-card"><div class="info-lbl">นามสกุล</div><div class="info-val" style="color:${info.c}">.${ext.toUpperCase()}</div></div>
+      <div class="info-card" style="grid-column:1/-1"><div class="info-lbl">แก้ไขล่าสุด</div><div class="info-val">${lm.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div>
+    </div>
+    <div class="info-note note-teal">✅ ไฟล์พร้อมใช้งาน · ขนาดปกติสำหรับ ${info.name}</div>
+  </div>`;
+}
+
+// ═══════════════════════ EXPORT ═══════════════════════
+function exportCSV(){
+  if(!lastScan) return;
+  const rows=[['File Name','Path','Extension','Size','Category','Status','Issues']];
+  lastScan.results.forEach(r=>{
+    rows.push([r.file.name, r.path, r.ext, r.file.size, r.cat?.name||'Other', r.status, r.issues.map(i=>i.msg).join('; ')]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  download(`${lastScan.jobName}_scan.csv`, 'text/csv', csv);
+}
+
+function exportJSON(){
+  if(!lastScan) return;
+  const data={...lastScan,results:lastScan.results.map(r=>({name:r.file.name,path:r.path,ext:r.ext,size:r.file.size,cat:r.cat?.name,status:r.status,issues:r.issues}))};
+  download(`${lastScan.jobName}_scan.json`,'application/json',JSON.stringify(data,null,2));
+}
+
+function exportPDF(){
+  if(!lastScan) return;
+  const {jobName,clientName,deadline,results,missingCats} = lastScan;
+  const ok=results.filter(r=>r.status==='ok').length;
+  const warn=results.filter(r=>r.status==='warn').length;
+  const statusColor=missingCats.length?'#ff4d6a':warn?'#ffb340':'#00e5c0';
+  const statusText=missingCats.length?'❌ ไม่พร้อม':warn?'⚠️ มีข้อสังเกต':'✅ พร้อมทำงาน';
+  const studio = settings.studio||'3D Studio';
+  const rows = results.map(r=>`
+    <tr style="border-bottom:1px solid #eee">
+      <td style="padding:5px 8px;font-size:11px">${r.file.name}</td>
+      <td style="padding:5px 8px;font-size:10px;color:#666">${r.path.split('/').slice(0,-1).join('/')||'/'}</td>
+      <td style="padding:5px 8px;font-size:11px">${r.ext.replace('.','').toUpperCase()}</td>
+      <td style="padding:5px 8px;font-size:11px">${fmtSize(r.file.size)}</td>
+      <td style="padding:5px 8px;font-size:11px;color:${r.status==='ok'?'#00b894':r.status==='warn'?'#e17055':'#d63031'}">${r.status.toUpperCase()}</td>
+    </tr>`).join('');
+  const missHTML = missingCats.length?`<h3 style="color:#d63031;margin:20px 0 8px">หมวดที่ขาด</h3><ul>${missingCats.map(c=>`<li>${c.icon} ${c.name}</li>`).join('')}</ul>`:'';
+  const html=`<html><head><meta charset="UTF-8"><title>Scan Report</title>
+  <style>body{font-family:sans-serif;padding:30px;color:#1a1a2e}h1{color:#1a1a2e;font-size:20px}h2{font-size:14px;color:#555;font-weight:400}table{width:100%;border-collapse:collapse}th{background:#f0f0f0;padding:6px 8px;font-size:11px;text-align:left}</style>
+  </head><body>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+    <div><h1>Asset Scan Report</h1><h2>${studio}</h2></div>
+    <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:${statusColor}">${statusText}</div><div style="font-size:11px;color:#999">${new Date().toLocaleDateString('th-TH')}</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#3d9eff">${results.length}</div><div style="font-size:11px;color:#999">ไฟล์ทั้งหมด</div></div>
+    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#00b894">${ok}</div><div style="font-size:11px;color:#999">ผ่าน</div></div>
+    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#e17055">${warn}</div><div style="font-size:11px;color:#999">เตือน</div></div>
+    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#d63031">${missingCats.length}</div><div style="font-size:11px;color:#999">หมวดขาด</div></div>
+  </div>
+  <table style="font-size:12px;margin-bottom:12px"><tr style="background:#1a1a2e;color:white"><th>ชื่อไฟล์</th><th>Path</th><th>นามสกุล</th><th>ขนาด</th><th>สถานะ</th></tr>${rows}</table>
+  ${missHTML}
+  <p style="font-size:10px;color:#aaa;margin-top:20px;text-align:right">Generated by Asset Checker v2 · Job: ${jobName} · Client: ${clientName} · Deadline: ${deadline||'—'}</p>
+  </body></html>`;
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),500);
+}
+
+function download(name, type, data){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data],{type}));
+  a.download=name; a.click();
+}
+
+function clearResults(){
+  lastScan=null;
+  document.getElementById('resultBody').innerHTML='<div class="empty"><span>📋</span>ยังไม่มีผลการสแกน</div>';
+  document.getElementById('status-pill').className='status-pill sp-idle';
+  document.getElementById('status-pill').textContent='รอสแกน';
+  document.getElementById('resultBanner').style.display='none';
+  document.getElementById('nb-results').style.display='none';
+  ['s-total','s-ok','s-warn','s-miss','s-depth'].forEach(id=>document.getElementById(id).textContent='0');
+}
+
+// ═══════════════════════ HISTORY ═══════════════════════
+function saveToHistory(scan){
+  const hist=JSON.parse(localStorage.getItem('ac_history')||'[]');
+  const entry={
+    ts:scan.ts,jobName:scan.jobName,clientName:scan.clientName,priority:scan.priority,
+    total:scan.totalFiles,ok:scan.results.filter(r=>r.status==='ok').length,
+    warn:scan.results.filter(r=>r.status==='warn').length,miss:scan.missingCats.length,
+    status:scan.missingCats.length||scan.results.some(r=>r.status==='err')?'fail':scan.results.some(r=>r.status==='warn')?'warn':'ok'
+  };
+  hist.unshift(entry);
+  if(hist.length>50) hist.pop();
+  localStorage.setItem('ac_history',JSON.stringify(hist));
+  loadHistoryBadge();
+  renderHistory();
+}
+
+function loadHistoryBadge(){
+  const hist=JSON.parse(localStorage.getItem('ac_history')||'[]');
+  const b=document.getElementById('nb-history');
+  if(hist.length){ b.style.display=''; b.textContent=hist.length; }
+}
+
+function renderHistory(){
+  const hist=JSON.parse(localStorage.getItem('ac_history')||'[]');
+  const body=document.getElementById('histBody');
+  if(!hist.length){ body.innerHTML='<div class="empty"><span>🕐</span>ยังไม่มีประวัติการสแกน</div>'; return; }
+  body.innerHTML=hist.map(h=>{
+    const d=new Date(h.ts);
+    const sc=h.status==='ok'?'nb-ok':h.status==='warn'?'nb-warn':'nb-err';
+    const st=h.status==='ok'?'✅ พร้อม':h.status==='warn'?'⚠️ มีข้อสังเกต':'❌ ไม่พร้อม';
+    return `<div class="hist-item">
+      <div class="hist-head">
+        <div class="hist-dot" style="background:${h.status==='ok'?'var(--teal)':h.status==='warn'?'var(--amber)':'var(--red)'}"></div>
+        <div class="hist-name">${h.jobName}</div>
+        <span class="nav-badge ${sc}">${st}</span>
+        <div class="hist-date">${d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
       </div>
-      <div style="margin-top:1.5rem;padding:12px 16px;background:rgba(0, 240, 202, 0.06);border:1px solid rgba(0, 240, 202, 0.2);border-radius:10px;font-size:13px;color:rgba(0, 240, 202, 0.85);line-height:1.7">
-        EXR ต้องการ Blender / DaVinci Resolve / Nuke เพื่อดู HDR layer — ไฟล์พร้อมใช้งาน
+      <div class="hist-meta">
+        <span>👤 ${h.clientName}</span>
+        <span>📁 ${h.total} ไฟล์</span>
+        <span style="color:var(--teal)">✓ ${h.ok}</span>
+        ${h.warn?`<span style="color:var(--amber)">⚠ ${h.warn}</span>`:''}
+        ${h.miss?`<span style="color:var(--red)">✗ ${h.miss} หมวดขาด</span>`:''}
       </div>
     </div>`;
+  }).join('');
 }
 
-// ─── App Info (blend, fbx, aep) ───
-function renderAppInfo(file, ext, container) {
-  const appInfo = {
-    blend: { name:'Blender',       icon:'🫙', color:'var(--amber)' },
-    fbx:   { name:'Autodesk FBX',  icon:'📦', color:'var(--purple)' },
-    aep:   { name:'After Effects', icon:'🎞',  color:'var(--blue)' }
-  };
-  const info = appInfo[ext] || { name:'Unknown', icon:'📄', color:'var(--muted)' };
-  const lmod = new Date(file.lastModified);
-  container.innerHTML = `
-    <div style="width:100%;max-width:440px;text-align:center">
-      <span style="font-size:56px;display:block;margin-bottom:1rem">${info.icon}</span>
-      <h3 style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;">${file.name}</h3>
-      <p style="font-size:12px;color:var(--muted);margin:4px 0 1.5rem;font-weight:500;">${info.name} Project File</p>
-      <div class="prev-info-grid">
-        <div class="prev-info-card"><div class="prev-info-label">ขนาดไฟล์</div><div class="prev-info-val">${fmtSize(file.size)}</div></div>
-        <div class="prev-info-card"><div class="prev-info-label">นามสกุล</div><div class="prev-info-val" style="color:${info.color}">.${ext.toUpperCase()}</div></div>
-        <div class="prev-info-card" style="grid-column:1/-1"><div class="prev-info-label">แก้ไขล่าสุด</div><div class="prev-info-val">${lmod.toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div>
-      </div>
-      <div style="margin-top:1.5rem;padding:12px 16px;background:rgba(0, 240, 202, 0.05);border:1px solid rgba(0, 240, 202, 0.2);border-radius:10px;font-size:13px;color:rgba(0, 240, 202, 0.8);line-height:1.7; text-align:left;">
-        <strong style="color:var(--teal)">✅ ไฟล์พร้อมใช้งาน</strong><br>ต้องใช้ ${info.name} เพื่อเปิด — ขนาดปกติสำหรับไฟล์ประเภทนี้
-      </div>
-    </div>`;
+function clearHistory(){
+  if(!confirm('ลบประวัติทั้งหมด?')) return;
+  localStorage.removeItem('ac_history');
+  loadHistoryBadge();
+  renderHistory();
+  document.getElementById('nb-history').style.display='none';
 }
 
-// ═══════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════
-function fmtSize(b) {
-  if (b === 0)            return '0 B';
-  if (b < 1024)           return b + ' B';
-  if (b < 1024 * 1024)   return (b / 1024).toFixed(1) + ' KB';
-  if (b < 1024**3)       return (b / 1024**2).toFixed(1) + ' MB';
-  return (b / 1024**3).toFixed(2) + ' GB';
+// ═══════════════════════ NAV ═══════════════════════
+const pageTitles={scan:'Scan Files',results:'Scan Results',tree:'Folder Tree',browser:'File Preview',history:'Scan History',settings:'Settings'};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('page-title').textContent=pageTitles[id]||id;
+  document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
 }
 
-/* ─── Thumb grid & card styles ─── */
-const thumbStyle = document.createElement('style');
-thumbStyle.textContent = `
-  .thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
-  .thumb-card{background:var(--card);border:1px solid var(--b1);border-radius:12px;overflow:hidden;cursor:pointer;transition:var(--transition);box-shadow: 0 4px 10px rgba(0,0,0,0.15);}
-  .thumb-card:hover,.thumb-card:focus{border-color:rgba(0,240,202,0.4);outline:none;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,240,202,0.08);}
-  .thumb-img{height:100px;background:var(--card2);display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:1px solid var(--b1);}
-  .thumb-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt);}
-  .thumb-size{font-size:11px;color:var(--muted);margin-top:2px;font-weight:500;}
-  .thumb-info{padding:10px 12px}
-`;
-document.head.appendChild(thumbStyle);
+// ═══════════════════════ UTILS ═══════════════════════
+function fmtSize(b){
+  if(!b) return '0 B';
+  if(b<1024) return b+' B';
+  if(b<1048576) return (b/1024).toFixed(1)+' KB';
+  if(b<1073741824) return (b/1048576).toFixed(1)+' MB';
+  return (b/1073741824).toFixed(2)+' GB';
+}
 
+// ═══════════════════════ START ═══════════════════════
 init();
 </script>
 </body>
