@@ -297,6 +297,7 @@ nav{padding:.5rem 0;flex:1;overflow-y:auto}
 <aside class="sidebar">
   <div class="brand">
     <h1>ASSET CHECKER</h1>
+    <p>3D · Blender · After Effects</p>
   </div>
   <nav>
     <div class="nav-sec">Workflow</div>
@@ -308,7 +309,7 @@ nav{padding:.5rem 0;flex:1;overflow-y:auto}
     <div class="nav-sec">Insights</div>
     <div class="nav-item" data-page="recent" onclick="nav('recent')"><span class="nav-ic">🕐</span><span class="nav-lbl">Recent Modified</span><span class="nbadge nb-g" id="nb-recent" style="display:none">—</span></div>
     <div class="nav-item" data-page="versions" onclick="nav('versions')"><span class="nav-ic">🔖</span><span class="nav-lbl">Version Detect</span><span class="nbadge nb-b" id="nb-ver" style="display:none">—</span></div>
-    <div class="nav-item" data-page="duplicates" onclick="nav('duplicates')"><span class="nav-ic">©</span><span class="nav-lbl">Duplicates</span><span class="nbadge nb-a" id="nb-dup" style="display:none">—</span></div>
+    <div class="nav-item" data-page="duplicates" onclick="nav('duplicates')"><span class="nav-ic">♊</span><span class="nav-lbl">Duplicates</span><span class="nbadge nb-a" id="nb-dup" style="display:none">—</span></div>
     <div class="nav-sec">Data</div>
     <div class="nav-item" data-page="history" onclick="nav('history')"><span class="nav-ic">📁</span><span class="nav-lbl">Scan History</span><span class="nbadge nb-b" id="nb-hist" style="display:none">0</span></div>
     <div class="nav-item" data-page="settings" onclick="nav('settings')"><span class="nav-ic">⚙️</span><span class="nav-lbl">Settings</span></div>
@@ -323,6 +324,7 @@ nav{padding:.5rem 0;flex:1;overflow-y:auto}
 
     <!-- SCAN -->
     <div class="page active" id="page-scan">
+      <div class="hint"><strong>📂 Deep Folder Scan</strong> — ลาก folder ลูกค้ามาวาง สแกนได้ลึกไม่จำกัดชั้น</div>
       <div class="job-row">
         <div class="field"><label>ชื่องาน / Job Name</label><input id="jobName" placeholder="e.g. CAR_ANIMATION_v3"></div>
         <div class="field"><label>Deadline</label><input type="date" id="deadline"></div>
