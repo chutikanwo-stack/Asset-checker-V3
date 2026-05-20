@@ -881,7 +881,7 @@ function buildDuplicates(){
 // ── PATCH 3: canPreview — hard cap 500MB ──
 function canPreview(file){
   if(file.size>500*1024*1024) return false;
-  return ['png','jpg','jpeg','webp','gif','mp4','mov','pdf','obj','glb','gltf','psd','ai','exr','blend','fbx','aep','hdr','tga'].includes(file.name.split('.').pop().toLowerCase());
+  return ['png','jpg','jpeg','webp','gif','mp4','mov','pdf','obj','glb','gltf','stl','psd','ai','exr','blend','fbx','aep','hdr','tga'].includes(file.name.split('.').pop().toLowerCase());
 }
 
 function openPreview(idx){
@@ -930,6 +930,8 @@ function renderPreview(file,ext){
     renderOBJ(file,body);
   } else if(['glb','gltf'].includes(ext)){
     renderGLB(file,body);
+  } else if(ext==='stl'){
+    renderSTL(file,body);
   } else if(['psd','ai','psb'].includes(ext)){
     renderPSDInfo(file,ext,body);
   } else if(['exr','hdr'].includes(ext)){
@@ -1119,6 +1121,107 @@ function startGLB(file,wrap){
         <div class="info-note note-blue">ℹ️ ไฟล์อาจ corrupt หรือใช้ feature ที่ browser ไม่รองรับ</div>
       </div>`;
     });
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── STL 360° Preview ──
+function renderSTL(file,container){
+  if(file.size>200*1024*1024){
+    container.innerHTML=`<div class="prev-info">
+      <span class="prev-icon">🔺</span>
+      <div class="prev-title">${file.name}</div>
+      <div class="prev-sub">ไฟล์ใหญ่เกินไปสำหรับ Preview (${fmtSize(file.size)})</div>
+      <div class="info-note note-blue">ℹ️ STL > 200MB ต้องเปิดใน Blender/Meshmixer โดยตรง<br>เพื่อป้องกัน browser crash</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML=`<div class="prev-3d" id="stlWrap">
+    <div class="prev-3d-hint">🖱 ลากเพื่อหมุน · Scroll Zoom</div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" id="stl-load">
+      <div class="spin"></div>
+      <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:8px;text-align:center">โหลด STL…</div>
+    </div>
+  </div>`;
+  const wrap=document.getElementById('stlWrap');
+  function loadSTLLoader(cb){
+    if(window.THREE&&window.THREE.STLLoader){ cb(); return; }
+    if(!window.THREE){
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.onload=()=>loadSTLLoader(cb);
+      document.head.appendChild(s); return;
+    }
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js';
+    s.onload=cb;
+    document.head.appendChild(s);
+  }
+  loadSTLLoader(()=>startSTL(file,wrap));
+}
+
+function startSTL(file,wrap){
+  const W=wrap.clientWidth, H=wrap.clientHeight||460;
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x040608);
+  scene.add(new THREE.AmbientLight(0xffffff,0.5));
+  const d1=new THREE.DirectionalLight(0x00ddb0,0.9); d1.position.set(5,8,5); scene.add(d1);
+  const d2=new THREE.DirectionalLight(0x4da8ff,0.4); d2.position.set(-4,-2,3); scene.add(d2);
+  const d3=new THREE.DirectionalLight(0xffffff,0.2); d3.position.set(0,0,-5); scene.add(d3);
+  scene.add(new THREE.GridHelper(10,20,0x1c2c3c,0x1c2c3c));
+  const camera=new THREE.PerspectiveCamera(45,W/H,0.001,100000);
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(W,H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  wrap.appendChild(renderer.domElement);
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const loader=new THREE.STLLoader();
+    const geo=loader.parse(e.target.result);
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+    const bs=geo.boundingSphere;
+    const sc=2/bs.radius;
+    const mat=new THREE.MeshStandardMaterial({color:0x00ddb0,roughness:0.45,metalness:0.25,side:THREE.DoubleSide});
+    const wmat=new THREE.MeshBasicMaterial({color:0x1c2c3c,wireframe:true});
+    const mesh=new THREE.Mesh(geo,mat);
+    const wmesh=new THREE.Mesh(geo,wmat);
+    [mesh,wmesh].forEach(m=>{
+      m.scale.setScalar(sc);
+      m.position.set(-bs.center.x*sc,-bs.center.y*sc,-bs.center.z*sc);
+      scene.add(m);
+    });
+    document.getElementById('stl-load')?.remove();
+    let zoom=4,drag=false,ox=0,oy=0,rx=0.2,ry=0;
+    renderer.domElement.addEventListener('mousedown',e=>{drag=true;ox=e.clientX;oy=e.clientY;});
+    window.addEventListener('mouseup',()=>drag=false);
+    renderer.domElement.addEventListener('mousemove',e=>{
+      if(!drag)return;
+      ry+=(e.clientX-ox)*0.008; rx+=(e.clientY-oy)*0.008;
+      rx=Math.max(-Math.PI/2+0.05,Math.min(Math.PI/2-0.05,rx));
+      ox=e.clientX; oy=e.clientY;
+    });
+    renderer.domElement.addEventListener('wheel',e=>{
+      zoom=Math.max(0.5,Math.min(50,zoom+e.deltaY*0.005));
+      e.preventDefault();
+    },{passive:false});
+    let lastTouchDist=0;
+    renderer.domElement.addEventListener('touchstart',e=>{
+      if(e.touches.length===1){drag=true;ox=e.touches[0].clientX;oy=e.touches[0].clientY;}
+      if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX;const dy=e.touches[0].clientY-e.touches[1].clientY;lastTouchDist=Math.sqrt(dx*dx+dy*dy);}
+    });
+    renderer.domElement.addEventListener('touchend',()=>drag=false);
+    renderer.domElement.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      if(e.touches.length===1&&drag){ry+=(e.touches[0].clientX-ox)*0.008;rx+=(e.touches[0].clientY-oy)*0.008;ox=e.touches[0].clientX;oy=e.touches[0].clientY;}
+      if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX;const dy=e.touches[0].clientY-e.touches[1].clientY;const dist=Math.sqrt(dx*dx+dy*dy);zoom=Math.max(0.5,Math.min(50,zoom-(dist-lastTouchDist)*0.01));lastTouchDist=dist;}
+    },{passive:false});
+    (function loop(){
+      requestAnimationFrame(loop);
+      camera.position.set(zoom*Math.sin(ry)*Math.cos(rx),zoom*Math.sin(rx),zoom*Math.cos(ry)*Math.cos(rx));
+      camera.lookAt(0,0,0);
+      renderer.render(scene,camera);
+    })();
   };
   reader.readAsArrayBuffer(file);
 }
