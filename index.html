@@ -1332,23 +1332,171 @@ function exportCSV(){
 function exportPDF(){
   if(!lastScan) return;
   const {jobName,results,missingCats}=lastScan;
-  const ok=results.filter(r=>r.status==='ok').length,warn=results.filter(r=>r.status==='warn').length;
-  const sc=missingCats.length?'#ff4d6d':warn?'#ffc040':'#00ddb0';
-  const st=missingCats.length?'❌ ไม่พร้อม':warn?'⚠️ มีข้อสังเกต':'✅ พร้อมทำงาน';
+  const ok=results.filter(r=>r.status==='ok').length;
+  const warn=results.filter(r=>r.status==='warn').length;
+  const err=results.filter(r=>r.status==='err').length;
+  const isReady=!missingCats.length&&!err;
+  const hasWarn=warn>0;
   const studio=settings.studio||'3D Studio';
-  const rows=results.map(r=>`<tr style="border-bottom:1px solid #eee"><td style="padding:5px 8px;font-size:11px">${r.file.name}</td><td style="padding:5px 8px;font-size:10px;color:#666">${r.path.split('/').slice(0,-1).join('/')||'/'}</td><td style="padding:5px 8px;font-size:11px">${r.ext.replace('.','').toUpperCase()}</td><td style="padding:5px 8px;font-size:11px">${fmtSize(r.file.size)}</td><td style="padding:5px 8px;font-size:11px;color:${r.status==='ok'?'#00b891':r.status==='warn'?'#e17055':'#d63031'}">${r.status.toUpperCase()}</td></tr>`).join('');
-  const missH=missingCats.length?`<h3 style="color:#d63031;margin:20px 0 8px">หมวดที่ขาด</h3><ul>${missingCats.map(c=>`<li>${c.icon} ${c.name}</li>`).join('')}</ul>`:'';
-  const html=`<html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:30px;color:#1a1a2e}table{width:100%;border-collapse:collapse}th{background:#f0f0f0;padding:6px 8px;font-size:11px;text-align:left}</style></head><body>
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px"><div><h1 style="font-size:20px;margin:0">Asset Scan Report</h1><h2 style="font-size:14px;color:#555;font-weight:400;margin:4px 0 0">${studio}</h2></div><div style="text-align:right"><div style="font-size:18px;font-weight:700;color:${sc}">${st}</div><div style="font-size:11px;color:#999">${new Date().toLocaleDateString('th-TH')}</div></div></div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#3d9eff">${results.length}</div><div style="font-size:11px;color:#999">ไฟล์ทั้งหมด</div></div>
-    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#00b891">${ok}</div><div style="font-size:11px;color:#999">ผ่าน</div></div>
-    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#e17055">${warn}</div><div style="font-size:11px;color:#999">เตือน</div></div>
-    <div style="background:#f9f9f9;padding:12px;border-radius:8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#d63031">${missingCats.length}</div><div style="font-size:11px;color:#999">หมวดขาด</div></div>
+  const dateStr=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  const timeStr=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+
+  // Status config
+  const statusCfg = missingCats.length||err
+    ? {label:'ไม่พร้อม',icon:'✕',bg:'#fff0f0',color:'#c0392b',bar:'#c0392b'}
+    : hasWarn
+    ? {label:'มีข้อสังเกต',icon:'!',bg:'#fffbf0',color:'#b45309',bar:'#f59e0b'}
+    : {label:'พร้อมทำงาน',icon:'✓',bg:'#f0fdf8',color:'#1a7a60',bar:'#1a7a60'};
+
+  // ext badge color
+  function extColor(ext){
+    const e=ext.replace('.','').toLowerCase();
+    if(['blend','c4d','ma','mb'].includes(e)) return '#92400e';
+    if(['fbx','obj','abc','gltf','glb','stl'].includes(e)) return '#5b21b6';
+    if(['psd','psb'].includes(e)) return '#2563eb';
+    if(['ai','eps'].includes(e)) return '#1d4ed8';
+    if(['png','jpg','jpeg','webp','tga','tif','tiff'].includes(e)) return '#166534';
+    if(['exr','hdr'].includes(e)) return '#15803d';
+    if(['mp4','mov','avi'].includes(e)) return '#c0392b';
+    if(['pdf','docx','xlsx'].includes(e)) return '#b91c1c';
+    if(['aep','prproj'].includes(e)) return '#3b82f6';
+    return '#6b7280';
+  }
+
+  // table rows — alternating bg
+  const rows=results.map((r,i)=>{
+    const bg=i%2===0?'#ffffff':'#f8f9fa';
+    const ext=r.ext.replace('.','').toUpperCase();
+    const ec=extColor(r.ext);
+    const dp=r.path.split('/').slice(0,-1).join('/')||'/';
+    const stColor=r.status==='ok'?'#1a7a60':r.status==='warn'?'#b45309':'#c0392b';
+    const stBg=r.status==='ok'?'#f0fdf8':r.status==='warn'?'#fffbf0':'#fff0f0';
+    const stLabel=r.status==='ok'?'OK':r.status==='warn'?'WARN':'ERROR';
+    return `<tr style="background:${bg}">
+      <td style="padding:7px 10px;font-size:10.5px;font-family:monospace;color:#1c1a18;max-width:200px;word-break:break-all">${r.file.name}</td>
+      <td style="padding:7px 10px;font-size:9.5px;color:#7a7269;max-width:160px;word-break:break-all">${dp}</td>
+      <td style="padding:7px 10px;text-align:center">
+        <span style="font-family:monospace;font-size:9px;font-weight:600;padding:2px 7px;border-radius:99px;background:${ec}18;color:${ec};border:1px solid ${ec}30">${ext}</span>
+      </td>
+      <td style="padding:7px 10px;font-size:10px;font-family:monospace;color:#7a7269;white-space:nowrap;text-align:right">${fmtSize(r.file.size)}</td>
+      <td style="padding:7px 10px;text-align:center">
+        <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:99px;background:${stBg};color:${stColor};border:1px solid ${stColor}30">${stLabel}</span>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // missing cats block
+  const missBlock=missingCats.length?`
+    <div style="margin-top:28px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:3px;height:18px;background:#c0392b;border-radius:2px"></div>
+        <span style="font-size:13px;font-weight:700;color:#c0392b">หมวดที่ขาด (${missingCats.length} หมวด)</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${missingCats.map(c=>`
+          <div style="background:#fff0f0;border:1px solid #f5c6c6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">${c.icon}</span>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#c0392b">${c.name}</div>
+              <div style="font-size:9px;color:#e07070;margin-top:2px;font-family:monospace">${c.exts.slice(0,4).join(' ')}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`:'';
+
+  const html=`<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:#fff;color:#1c1a18;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{margin:0;size:A4}
+  @media print{body{margin:0}}
+</style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column">
+
+  <!-- HEADER BAR -->
+  <div style="background:#1c1a18;padding:22px 36px;display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;color:#1a7a60;text-transform:uppercase;margin-bottom:5px">ASSET SCAN REPORT</div>
+      <div style="font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-.02em">${jobName}</div>
+      <div style="font-size:11px;color:#7a7269;margin-top:3px">${studio}</div>
+    </div>
+    <div style="text-align:right">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:${statusCfg.bg};border:1.5px solid ${statusCfg.color}30;border-radius:10px;padding:10px 16px">
+        <div style="width:22px;height:22px;background:${statusCfg.color};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff">${statusCfg.icon}</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${statusCfg.color}">${statusCfg.label}</div>
+          <div style="font-size:9px;color:#999;margin-top:1px">${dateStr} · ${timeStr}</div>
+        </div>
+      </div>
+    </div>
   </div>
-  <table><tr style="background:#1a1a2e;color:white"><th>ชื่อไฟล์</th><th>Path</th><th>นามสกุล</th><th>ขนาด</th><th>สถานะ</th></tr>${rows}</table>
-  ${missH}<p style="font-size:10px;color:#aaa;margin-top:20px;text-align:right">Asset Checker v3 · ${jobName}</p></body></html>`;
-  const w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(()=>w.print(),400);
+
+  <!-- SUMMARY STRIP -->
+  <div style="background:#f5f3ef;border-bottom:1px solid #e5e0d8;padding:16px 36px;display:grid;grid-template-columns:repeat(5,1fr);gap:1px">
+    ${[
+      {n:results.length, l:'ไฟล์ทั้งหมด', c:'#2563eb'},
+      {n:ok,             l:'ผ่าน',         c:'#1a7a60'},
+      {n:warn,           l:'เตือน',        c:'#b45309'},
+      {n:err,            l:'Error',        c:'#c0392b'},
+      {n:missingCats.length, l:'หมวดขาด', c:'#c0392b'},
+    ].map((s,i)=>`
+      <div style="text-align:center;padding:12px 8px;background:#fff;border-radius:8px;margin:0 4px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <div style="font-family:'DM Mono',monospace;font-size:28px;font-weight:500;color:${s.c};line-height:1">${s.n}</div>
+        <div style="font-size:9.5px;color:#7a7269;margin-top:5px;font-weight:500;letter-spacing:.02em">${s.l}</div>
+      </div>`).join('')}
+  </div>
+
+  <!-- CONTENT -->
+  <div style="padding:28px 36px;flex:1">
+
+    <!-- Section header -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:3px;height:18px;background:#1a7a60;border-radius:2px"></div>
+      <span style="font-size:13px;font-weight:700;color:#1c1a18">รายการไฟล์ทั้งหมด</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#7a7269;margin-left:4px">${results.length} files</span>
+    </div>
+
+    <!-- Table -->
+    <table style="width:100%;border-collapse:collapse;border:1px solid #e5e0d8;border-radius:10px;overflow:hidden;font-size:11px">
+      <thead>
+        <tr style="background:#1c1a18">
+          <th style="padding:9px 10px;text-align:left;font-size:9.5px;font-weight:600;letter-spacing:.06em;color:#aaa;text-transform:uppercase;width:35%">ชื่อไฟล์</th>
+          <th style="padding:9px 10px;text-align:left;font-size:9.5px;font-weight:600;letter-spacing:.06em;color:#aaa;text-transform:uppercase;width:28%">Path</th>
+          <th style="padding:9px 10px;text-align:center;font-size:9.5px;font-weight:600;letter-spacing:.06em;color:#aaa;text-transform:uppercase;width:10%">Format</th>
+          <th style="padding:9px 10px;text-align:right;font-size:9.5px;font-weight:600;letter-spacing:.06em;color:#aaa;text-transform:uppercase;width:12%">ขนาด</th>
+          <th style="padding:9px 10px;text-align:center;font-size:9.5px;font-weight:600;letter-spacing:.06em;color:#aaa;text-transform:uppercase;width:15%">สถานะ</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    ${missBlock}
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:#f5f3ef;border-top:1px solid #e5e0d8;padding:14px 36px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:#b0a89e;letter-spacing:.1em">ASSET CHECKER v3 · ${studio.toUpperCase()}</div>
+    <div style="display:flex;gap:20px">
+      <span style="font-size:9px;color:#b0a89e">✓ ${ok} passed</span>
+      ${warn?`<span style="font-size:9px;color:#b45309">⚠ ${warn} warnings</span>`:''}
+      ${missingCats.length?`<span style="font-size:9px;color:#c0392b">✕ ${missingCats.length} missing</span>`:''}
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:#b0a89e">${dateStr}</div>
+  </div>
+
+</div>
+</body></html>`;
+
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
 }
 function download(name,type,data){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type})); a.download=name; a.click(); }
 function clearResults(){ lastScan=null; document.getElementById('resultBody').innerHTML='<div class="empty"><span>📋</span>ยังไม่มีผลการสแกน</div>'; document.getElementById('banner').style.display='none'; document.getElementById('nb-res').style.display='none'; ['s-tot','s-ok','s-warn','s-miss','s-depth'].forEach(id=>document.getElementById(id).textContent='0'); }
