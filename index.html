@@ -881,7 +881,7 @@ function buildDuplicates(){
 // ── PATCH 3: canPreview — hard cap 500MB ──
 function canPreview(file){
   if(file.size>500*1024*1024) return false;
-  return ['png','jpg','jpeg','webp','gif','mp4','mov','pdf','obj','psd','ai','exr','blend','fbx','aep','hdr','tga'].includes(file.name.split('.').pop().toLowerCase());
+  return ['png','jpg','jpeg','webp','gif','mp4','mov','pdf','obj','glb','gltf','psd','ai','exr','blend','fbx','aep','hdr','tga'].includes(file.name.split('.').pop().toLowerCase());
 }
 
 function openPreview(idx){
@@ -928,6 +928,8 @@ function renderPreview(file,ext){
     body.innerHTML=`<iframe src="${url}" style="width:100%;height:66vh;border:none;border-radius:8px"></iframe>`;
   } else if(ext==='obj'){
     renderOBJ(file,body);
+  } else if(['glb','gltf'].includes(ext)){
+    renderGLB(file,body);
   } else if(['psd','ai','psb'].includes(ext)){
     renderPSDInfo(file,ext,body);
   } else if(['exr','hdr'].includes(ext)){
@@ -977,6 +979,148 @@ function startOBJ(file,wrap){
     renderer.domElement.addEventListener('wheel',e=>{zoom=Math.max(.5,Math.min(50,zoom+e.deltaY*.005));e.preventDefault();},{passive:false});
     (function loop(){requestAnimationFrame(loop); camera.position.set(zoom*Math.sin(ry)*Math.cos(rx),zoom*Math.sin(rx),zoom*Math.cos(ry)*Math.cos(rx)); camera.lookAt(0,0,0); renderer.render(scene,camera);})();
   }; reader.readAsText(file);
+}
+
+// ── GLB/GLTF 360° Preview ──
+function renderGLB(file,container){
+  if(file.size>200*1024*1024){
+    container.innerHTML=`<div class="prev-info">
+      <span class="prev-icon">🟢</span>
+      <div class="prev-title">${file.name}</div>
+      <div class="prev-sub">ไฟล์ใหญ่เกินไปสำหรับ Preview (${fmtSize(file.size)})</div>
+      <div class="info-note note-blue">ℹ️ GLB > 200MB ต้องเปิดใน Blender โดยตรง<br>เพื่อป้องกัน browser crash</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML=`<div class="prev-3d" id="glbWrap">
+    <div class="prev-3d-hint">🖱 ลากเพื่อหมุน · Scroll Zoom · texture + material ครบ</div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" id="glb-load">
+      <div class="spin"></div>
+      <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:8px;text-align:center">โหลด GLB…</div>
+    </div>
+  </div>`;
+  const wrap=document.getElementById('glbWrap');
+  // โหลด Three.js ก่อน แล้วค่อยโหลด GLTFLoader
+  function loadGLTFLoader(cb){
+    if(window.THREE&&window.THREE.GLTFLoader){ cb(); return; }
+    if(!window.THREE){
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.onload=()=>loadGLTFLoader(cb);
+      document.head.appendChild(s); return;
+    }
+    // Three.js โหลดแล้ว แต่ยังไม่มี GLTFLoader
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+    s.onload=cb;
+    document.head.appendChild(s);
+  }
+  loadGLTFLoader(()=>startGLB(file,wrap));
+}
+
+function startGLB(file,wrap){
+  const W=wrap.clientWidth, H=wrap.clientHeight||460;
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x040608);
+
+  // Lighting — ครบสำหรับ PBR material
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  const sun=new THREE.DirectionalLight(0xfff5e0, 1.2);
+  sun.position.set(5,8,5); scene.add(sun);
+  const fill=new THREE.DirectionalLight(0x8eceff, 0.4);
+  fill.position.set(-4,-2,3); scene.add(fill);
+  const rim=new THREE.DirectionalLight(0x00ddb0, 0.3);
+  rim.position.set(0,0,-6); scene.add(rim);
+
+  scene.add(new THREE.GridHelper(10,20,0x1c2c3c,0x1c2c3c));
+
+  const camera=new THREE.PerspectiveCamera(45, W/H, 0.001, 100000);
+  camera.position.set(0, 1.5, 4);
+
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(W,H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.physicallyCorrectLights=true;
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.0;
+  wrap.appendChild(renderer.domElement);
+
+  // อ่านไฟล์เป็น ArrayBuffer แล้วส่งให้ GLTFLoader
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const loader=new THREE.GLTFLoader();
+    loader.parse(e.target.result, '', gltf=>{
+      const model=gltf.scene;
+
+      // คำนวณ bounding box เพื่อ auto-fit
+      const box=new THREE.Box3().setFromObject(model);
+      const size=box.getSize(new THREE.Vector3());
+      const center=box.getCenter(new THREE.Vector3());
+      const maxDim=Math.max(size.x, size.y, size.z);
+      const scale=2.5/maxDim;
+
+      model.scale.setScalar(scale);
+      model.position.set(
+        -center.x*scale,
+        -center.y*scale + (size.y*scale*0.5),
+        -center.z*scale
+      );
+
+      scene.add(model);
+      document.getElementById('glb-load')?.remove();
+
+      // auto camera distance
+      let zoom=maxDim*scale*2.2;
+
+      // Mouse controls
+      let drag=false, ox=0, oy=0, rx=0.2, ry=0;
+      renderer.domElement.addEventListener('mousedown', e=>{drag=true; ox=e.clientX; oy=e.clientY;});
+      window.addEventListener('mouseup', ()=>drag=false);
+      renderer.domElement.addEventListener('mousemove', e=>{
+        if(!drag) return;
+        ry+=(e.clientX-ox)*0.008; rx+=(e.clientY-oy)*0.008;
+        rx=Math.max(-Math.PI/2+0.05, Math.min(Math.PI/2-0.05, rx));
+        ox=e.clientX; oy=e.clientY;
+      });
+      renderer.domElement.addEventListener('wheel', e=>{
+        zoom=Math.max(0.5, Math.min(20, zoom+e.deltaY*0.005));
+        e.preventDefault();
+      },{passive:false});
+
+      // Touch support
+      let lastTouchDist=0;
+      renderer.domElement.addEventListener('touchstart', e=>{
+        if(e.touches.length===1){drag=true; ox=e.touches[0].clientX; oy=e.touches[0].clientY;}
+        if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX; const dy=e.touches[0].clientY-e.touches[1].clientY; lastTouchDist=Math.sqrt(dx*dx+dy*dy);}
+      });
+      renderer.domElement.addEventListener('touchend', ()=>drag=false);
+      renderer.domElement.addEventListener('touchmove', e=>{
+        e.preventDefault();
+        if(e.touches.length===1&&drag){ry+=(e.touches[0].clientX-ox)*0.008; rx+=(e.touches[0].clientY-oy)*0.008; ox=e.touches[0].clientX; oy=e.touches[0].clientY;}
+        if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX; const dy=e.touches[0].clientY-e.touches[1].clientY; const dist=Math.sqrt(dx*dx+dy*dy); zoom=Math.max(0.5,Math.min(20,zoom-(dist-lastTouchDist)*0.01)); lastTouchDist=dist;}
+      },{passive:false});
+
+      (function loop(){
+        requestAnimationFrame(loop);
+        camera.position.set(
+          zoom*Math.sin(ry)*Math.cos(rx),
+          zoom*Math.sin(rx),
+          zoom*Math.cos(ry)*Math.cos(rx)
+        );
+        camera.lookAt(0, size.y*scale*0.3, 0);
+        renderer.render(scene, camera);
+      })();
+
+    }, err=>{
+      wrap.innerHTML=`<div class="prev-info" style="padding:2rem">
+        <span class="prev-icon">⚠️</span>
+        <div class="prev-title">โหลด GLB ไม่สำเร็จ</div>
+        <div class="info-note note-blue">ℹ️ ไฟล์อาจ corrupt หรือใช้ feature ที่ browser ไม่รองรับ</div>
+      </div>`;
+    });
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 function renderPSDInfo(file,ext,body){
